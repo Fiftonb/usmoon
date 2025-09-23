@@ -25,52 +25,49 @@ import {
   Zap
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
   const [inputText, setInputText] = useState("");
   const [sourceLang, setSourceLang] = useState("auto");
   const [targetLang, setTargetLang] = useState("en");
-  const [apiKey, setApiKey] = useState("");
-  const [baseURL, setBaseURL] = useState("");
+  const [apiKey, setApiKey] = useState("YOUR_API_KEY");
+  const [baseURL, setBaseURL] = useState("https://api.openai.com/v1");
   const [model, setModel] = useState("gpt-3.5-turbo");
-  
-  const { translatedText, isLoading, error, translate, reset } = useTranslate();
   const { toast } = useToast();
 
   // Load settings from localStorage
   useEffect(() => {
-    const savedApiKey = localStorage.getItem("translate-api-key");
-    const savedBaseURL = localStorage.getItem("translate-base-url");
-    const savedModel = localStorage.getItem("translate-model");
+    const savedApiKey = localStorage.getItem("openai-api-key");
+    const savedBaseURL = localStorage.getItem("openai-base-url");
+    const savedModel = localStorage.getItem("openai-model");
+    
     if (savedApiKey) setApiKey(savedApiKey);
     if (savedBaseURL) setBaseURL(savedBaseURL);
     if (savedModel) setModel(savedModel);
   }, []);
 
-  const handleSaveSettings = (newApiKey: string, newBaseURL: string, newModel: string) => {
-    setApiKey(newApiKey);
-    setBaseURL(newBaseURL);
-    setModel(newModel);
-    localStorage.setItem("translate-api-key", newApiKey);
-    localStorage.setItem("translate-base-url", newBaseURL);
-    localStorage.setItem("translate-model", newModel);
-  };
+  const {
+    translatedText,
+    isLoading,
+    error,
+    translate,
+    reset
+  } = useTranslate();
 
   const handleTranslate = async () => {
     if (!inputText.trim()) {
       toast({
-        title: "Input Required",
-        description: "Please enter some text to translate.",
         variant: "destructive",
+        description: "Please enter text to translate",
       });
       return;
     }
 
     if (!apiKey) {
       toast({
-        title: "API Key Required",
-        description: "Please configure your API key in settings.",
-        variant: "destructive",
+        variant: "destructive", 
+        description: "Please configure your API key in settings",
       });
       return;
     }
@@ -80,8 +77,8 @@ export default function Home() {
       sourceLang,
       targetLang,
       apiKey,
-      baseURL: baseURL || undefined,
-      model,
+      baseURL,
+      model
     });
   };
 
@@ -97,48 +94,85 @@ export default function Home() {
     }
   };
 
-  const handleCopyResult = async () => {
-    if (translatedText) {
-      await navigator.clipboard.writeText(translatedText);
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
       toast({
-        title: "Copied!",
-        description: "Translation copied to clipboard.",
+        description: "Copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        description: "Failed to copy text",
       });
     }
   };
 
-  const handleClear = () => {
-    setInputText("");
-    reset();
+  const handleSaveSettings = (newApiKey: string, newBaseURL: string, newModel: string) => {
+    setApiKey(newApiKey);
+    setBaseURL(newBaseURL);
+    setModel(newModel);
+    
+    localStorage.setItem("openai-api-key", newApiKey);
+    localStorage.setItem("openai-base-url", newBaseURL);
+    localStorage.setItem("openai-model", newModel);
+    
+    toast({
+      description: "Settings saved successfully",
+    });
   };
 
   const sourceLanguages = languages;
   const targetLanguages = languages.filter(lang => lang.code !== "auto");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background relative overflow-hidden animate-scale-in">
+      {/* 现代化背景层 */}
+      <div className="pointer-events-none absolute inset-0 bg-dot-pattern [mask-image:linear-gradient(to_bottom,rgba(0,0,0,0.15),rgba(0,0,0,1))] dark:[mask-image:linear-gradient(to_bottom,rgba(255,255,255,0.08),rgba(255,255,255,1))]"></div>
+      
+      {/* 渐变装饰层 */}
+      <div className="pointer-events-none absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse-gentle"></div>
+      <div className="pointer-events-none absolute bottom-0 right-1/4 w-80 h-80 bg-gradient-to-r from-green-400/20 via-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-float"></div>
+      
+      <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Languages className="h-8 w-8 text-primary" />
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+        <div className="text-center mb-12 animate-slide-in">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="relative">
+              <Languages className="h-10 w-10 text-primary animate-float" />
+              <div className="absolute inset-0 h-10 w-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur-md opacity-30 animate-pulse-gentle"></div>
+            </div>
+            <h1 className="text-5xl lg:text-6xl font-bold gradient-text">
               AI Translator
             </h1>
           </div>
-          <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Powerful AI-driven translation supporting multiple languages with OpenAI-compatible APIs
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            Experience the power of AI-driven translation with stunning visual design
+            <br />
+            <span className="text-sm opacity-75">Supporting multiple languages with OpenAI-compatible APIs</span>
           </p>
+          
+          {/* 装饰性元素 */}
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <div className="h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent w-20"></div>
+            <Zap className="h-4 w-4 text-primary animate-pulse" />
+            <div className="h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent w-20"></div>
+          </div>
         </div>
 
         {/* Settings */}
-        <div className="flex justify-end mb-6">
-          <SettingsDialog
-            apiKey={apiKey}
-            baseURL={baseURL}
-            model={model}
-            onSave={handleSaveSettings}
-          />
+        <div className="flex justify-end items-center gap-3 mb-8 animate-slide-in" style={{ animationDelay: '0.1s' }}>
+          <div className="hover-float">
+            <ThemeToggle />
+          </div>
+          <div className="hover-float">
+            <SettingsDialog
+              apiKey={apiKey}
+              baseURL={baseURL}
+              model={model}
+              onSave={handleSaveSettings}
+            />
+          </div>
         </div>
 
         {/* API Test Section - Show when API key is configured */}
@@ -147,13 +181,13 @@ export default function Home() {
         )}
 
         {/* Language Selection */}
-        <Card className="mb-6">
+        <Card className="mb-8 border-animate glass-effect shadow-elegant card-hover animate-slide-in" style={{ animationDelay: '0.3s' }}>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="flex-1">
                 <label className="text-sm font-medium mb-2 block">From</label>
                 <Select value={sourceLang} onValueChange={setSourceLang}>
-                  <SelectTrigger>
+                  <SelectTrigger className="glass-effect border-animate">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -166,29 +200,22 @@ export default function Home() {
                 </Select>
               </div>
               
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={handleSwapLanguages}
-                      disabled={sourceLang === "auto"}
-                      className="mt-6"
-                    >
-                      <ArrowLeftRight className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Swap languages</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
+              <div className="flex flex-col items-center gap-2 mt-6">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleSwapLanguages}
+                  disabled={sourceLang === "auto"}
+                  className="btn-modern hover-float"
+                >
+                  <ArrowLeftRight className="h-4 w-4" />
+                </Button>
+              </div>
+              
               <div className="flex-1">
                 <label className="text-sm font-medium mb-2 block">To</label>
                 <Select value={targetLang} onValueChange={setTargetLang}>
-                  <SelectTrigger>
+                  <SelectTrigger className="glass-effect border-animate">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -205,99 +232,114 @@ export default function Home() {
         </Card>
 
         {/* Translation Interface */}
-        <div className="grid md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Input */}
-          <Card>
+          <Card className="card-hover glass-effect shadow-elegant animate-slide-in" style={{ animationDelay: '0.4s' }}>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Original Text</span>
-                <Badge variant="outline">
-                  {inputText.length} chars
+              <CardTitle className="text-lg font-semibold">
+                Input Text
+                <Badge variant="secondary" className="ml-2 text-xs">
+                  {getLanguageName(sourceLang)}
                 </Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <Textarea
                 placeholder="Enter text to translate..."
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                className="min-h-[200px] resize-none"
+                className="min-h-[200px] resize-none glass-effect border-animate focus:shadow-luxury transition-all duration-300"
               />
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">
+                  {inputText.length} characters
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setInputText("")}
+                    className="hover-float"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Clear
+                  </Button>
+                  <Button
+                    onClick={handleTranslate}
+                    disabled={isLoading || !inputText.trim()}
+                    className="btn-modern hover-float clickable"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Translating...
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="h-4 w-4 mr-2" />
+                        Translate
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           {/* Output */}
-          <Card>
+          <Card className="card-hover glass-effect shadow-elegant animate-slide-in" style={{ animationDelay: '0.5s' }}>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Translation</span>
-                {translatedText && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCopyResult}
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copy
-                  </Button>
-                )}
+              <CardTitle className="text-lg font-semibold">
+                Translation Result
+                <Badge variant="secondary" className="ml-2 text-xs">
+                  {getLanguageName(targetLang)}
+                </Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-4/5" />
-                  <Skeleton className="h-4 w-3/5" />
-                  <Skeleton className="h-4 w-4/5" />
-                  <Skeleton className="h-4 w-2/5" />
-                </div>
-              ) : translatedText ? (
-                <div className="min-h-[200px] p-3 bg-muted/50 rounded-md">
-                  <p className="whitespace-pre-wrap">{translatedText}</p>
-                </div>
-              ) : (
-                <div className="min-h-[200px] flex items-center justify-center text-muted-foreground">
-                  Translation will appear here...
-                </div>
-              )}
+            <CardContent className="space-y-4">
+                             <div className="min-h-[200px] p-4 rounded-md bg-muted/30 border border-border/50 glass-effect">
+                 {isLoading ? (
+                   <div className="space-y-2">
+                     <Skeleton className="h-4 w-full" />
+                     <Skeleton className="h-4 w-3/4" />
+                     <Skeleton className="h-4 w-1/2" />
+                   </div>
+                 ) : error ? (
+                   <div className="text-destructive text-sm">{error}</div>
+                 ) : translatedText ? (
+                   <div className="whitespace-pre-wrap text-sm leading-relaxed">{translatedText}</div>
+                 ) : (
+                   <div className="text-muted-foreground text-sm italic">
+                     Translation will appear here...
+                   </div>
+                 )}
+               </div>
+               <div className="flex justify-end">
+                 <Button
+                   variant="outline"
+                   size="sm"
+                   onClick={() => handleCopy(translatedText || "")}
+                   disabled={!translatedText}
+                   className="hover-float"
+                 >
+                   <Copy className="h-4 w-4 mr-2" />
+                   Copy
+                 </Button>
+               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-center gap-4">
-          <Button
-            onClick={handleTranslate}
-            disabled={isLoading || !inputText.trim()}
-            size="lg"
-            className="px-8"
-          >
-            <Zap className="h-4 w-4 mr-2" />
-            {isLoading ? "Translating..." : "Translate"}
-          </Button>
-          
-          <Button
-            variant="outline"
-            onClick={handleClear}
-            disabled={!inputText && !translatedText}
-            size="lg"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Clear
-          </Button>
-        </div>
-
-        {/* Error Display */}
-        {error && (
-          <Card className="mt-6 border-destructive">
-            <CardContent className="pt-6">
-              <div className="text-destructive">
-                <strong>Error:</strong> {error}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                 {/* Error Display */}
+         {error && (
+           <Card className="glass-effect shadow-elegant border-destructive/50 animate-slide-in" style={{ animationDelay: '0.6s' }}>
+             <CardContent className="pt-6">
+               <div className="text-destructive text-sm">
+                 <strong>Error:</strong> {error}
+               </div>
+             </CardContent>
+           </Card>
+         )}
       </div>
     </div>
   );
