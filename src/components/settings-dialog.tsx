@@ -157,79 +157,80 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
           <Settings className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[500px] max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t("settings.title")}</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-base sm:text-lg">{t("settings.title")}</DialogTitle>
+          <DialogDescription className="text-sm">
             {t("settings.description")}
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+        <div className="grid gap-3 sm:gap-4 py-3 sm:py-4">
           <div className="space-y-2">
-            <Label htmlFor="apiKey">{t("settings.api_key")} *</Label>
+            <Label htmlFor="apiKey" className="text-sm font-medium">{t("settings.api_key")} *</Label>
             <Textarea
               id="apiKey"
               placeholder={t("settings.api_key_placeholder")}
               value={tempApiKey}
               onChange={(e) => setTempApiKey(e.target.value)}
-              className="resize-none"
-              rows={3}
+              className="resize-none text-sm"
+              rows={2}
             />
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <CheckCircle className="h-4 w-4" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
               <span>{t("settings.security_note")}</span>
             </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="baseURL">{t("settings.base_url_optional")}</Label>
+            <Label htmlFor="baseURL" className="text-sm font-medium">{t("settings.base_url_optional")}</Label>
             <Textarea
               id="baseURL"
               placeholder={t("settings.base_url_placeholder")}
               value={tempBaseURL}
               onChange={(e) => setTempBaseURL(e.target.value)}
-              className={`resize-none ${!isValidURL ? 'border-destructive' : ''}`}
+              className={`resize-none text-sm ${!isValidURL ? 'border-destructive' : ''}`}
               rows={2}
             />
             {!isValidURL && (
-              <div className="flex items-center gap-2 text-sm text-destructive">
-                <AlertCircle className="h-4 w-4" />
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-destructive">
+                <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                 <span>{t("settings.valid_url_note")}</span>
               </div>
             )}
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {t("settings.base_url_note")}
             </p>
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="model">{t("settings.model_required")} *</Label>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <Label htmlFor="model" className="text-sm font-medium">{t("settings.model_required")} *</Label>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleRefreshModels}
                 disabled={modelsLoading || !tempApiKey.trim()}
+                className="text-xs sm:text-sm h-8 px-2 sm:px-3"
               >
                 {modelsLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
                 ) : (
-                  <RefreshCw className="h-4 w-4" />
+                  <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
                 )}
-                <span className="ml-2">{t("settings.refresh")}</span>
+                <span className="ml-1 sm:ml-2">{t("settings.refresh")}</span>
               </Button>
             </div>
             <Select value={tempModel} onValueChange={setTempModel}>
-              <SelectTrigger>
+              <SelectTrigger className="text-sm">
                 <SelectValue placeholder={t("settings.select_model")} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[200px]">
                 {models.map((modelOption) => (
-                  <SelectItem key={modelOption.id} value={modelOption.id}>
-                    <div className="flex items-center gap-2">
-                      <span>{modelOption.id}</span>
+                  <SelectItem key={modelOption.id} value={modelOption.id} className="text-sm">
+                    <div className="flex items-center gap-2 w-full">
+                      <span className="truncate flex-1">{modelOption.id}</span>
                       {modelOption.owned_by && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs flex-shrink-0">
                           {modelOption.owned_by}
                         </Badge>
                       )}
@@ -239,24 +240,24 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
               </SelectContent>
             </Select>
             
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
               <span>{t("settings.models_count", { count: models.length })}</span>
-              {modelsLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {modelsLoading && <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />}
             </div>
             
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {t("settings.models_note")}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label>{t("settings.common_endpoints")}</Label>
-            <div className="flex flex-wrap gap-2">
+            <Label className="text-sm font-medium">{t("settings.common_endpoints")}</Label>
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {commonEndpoints.map((endpoint) => (
                 <Badge
                   key={endpoint.name}
                   variant="outline"
-                  className="cursor-pointer hover:bg-accent"
+                  className="cursor-pointer hover:bg-accent text-xs px-2 py-1"
                   onClick={() => setTempBaseURL(endpoint.url)}
                 >
                   {endpoint.name}
@@ -265,9 +266,9 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
             </div>
           </div>
 
-          <div className="bg-muted/50 rounded-md p-3 space-y-2">
-            <div className="font-medium text-sm">{t("settings.dynamic_loading_title")}</div>
-            <ul className="text-sm text-muted-foreground space-y-1">
+          <div className="bg-muted/50 rounded-md p-2.5 sm:p-3 space-y-2">
+            <div className="font-medium text-xs sm:text-sm">{t("settings.dynamic_loading_title")}</div>
+            <ul className="text-xs sm:text-sm text-muted-foreground space-y-1">
               <li>• {t("settings.dynamic_loading_notes.0")}</li>
               <li>• {t("settings.dynamic_loading_notes.1")}</li>
               <li>• {t("settings.dynamic_loading_notes.2")}</li>
@@ -275,11 +276,11 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
             </ul>
           </div>
         </div>
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={handleCancel}>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2 sm:pt-0">
+          <Button variant="outline" onClick={handleCancel} className="text-sm h-9">
             {t("settings.cancel")}
           </Button>
-          <Button onClick={handleSave} disabled={!isValidURL || !tempModel}>
+          <Button onClick={handleSave} disabled={!isValidURL || !tempModel} className="text-sm h-9">
             {t("settings.save")}
           </Button>
         </div>
