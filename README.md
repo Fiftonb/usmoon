@@ -64,6 +64,36 @@ npm start
 
 访问 [http://localhost:3000](http://localhost:3000) 查看应用。
 
+## 🚀 一键部署
+
+### 部署到 Vercel
+
+点击下面的按钮即可一键部署到 Vercel：
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FFiftonb%2Fusmoon&project-name=usmoon-ai-translator&repository-name=usmoon)
+
+**部署步骤：**
+
+1. 点击上方的 "Deploy with Vercel" 按钮
+2. 使用 GitHub、GitLab 或 Bitbucket 账号登录 Vercel
+3. 授权 Vercel 访问你的 GitHub 仓库
+4. 项目将自动开始构建和部署
+5. 部署完成后，你将获得一个 `.vercel.app` 域名
+
+**可选环境变量配置：**
+
+虽然应用可以在不设置环境变量的情况下正常运行（用户可以在应用内配置 API），但你也可以在 Vercel 中预设置以下环境变量：
+
+- `OPENAI_API_KEY` - OpenAI API 密钥
+- `OPENAI_BASE_URL` - API 服务端点 (默认: https://api.openai.com/v1)
+- `OPENAI_MODEL` - 使用的模型 (默认: gpt-3.5-turbo)
+
+### 自定义域名
+
+部署完成后，你可以在 Vercel 控制台中绑定自定义域名。
+
+> 📖 **详细部署指南**: 查看 [DEPLOYMENT.md](DEPLOYMENT.md) 获取更详细的部署说明和故障排除指南。
+
 ## ⚙️ 配置说明
 
 ### API 配置
