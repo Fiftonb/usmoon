@@ -4,7 +4,6 @@
   "env": {
     "NEXT_PUBLIC_APP_NAME": "USMoon AI Translator"
   },
-  "regions": ["hnd1", "sfo1"],
   "functions": {
     "src/pages/api/**/*.ts": {
       "maxDuration": 30
