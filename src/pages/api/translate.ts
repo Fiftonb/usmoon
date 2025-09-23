@@ -64,6 +64,28 @@ export default async function handler(
 
 ${text}`;
 
+    // Dynamic max_tokens based on model and input length
+    const getMaxTokens = (modelName: string, inputLength: number) => {
+      const baseTokens = Math.max(inputLength * 2, 1000); // At least 2x input length or 1000 minimum
+      
+      switch (modelName) {
+        case 'gpt-3.5-turbo':
+          return Math.min(baseTokens, 4000);
+        case 'gpt-3.5-turbo-16k':
+          return Math.min(baseTokens, 16000);
+        case 'gpt-4':
+        case 'gpt-4-turbo':
+          return Math.min(baseTokens, 8000);
+        case 'gpt-4-32k':
+          return Math.min(baseTokens, 32000);
+        default:
+          return Math.min(baseTokens, 4000);
+      }
+    };
+
+    const maxTokens = getMaxTokens(model || "gpt-3.5-turbo", text.length);
+    console.log(`Using max_tokens: ${maxTokens} for model: ${model || "gpt-3.5-turbo"}`);
+
     let completion;
     
     try {
@@ -77,8 +99,8 @@ ${text}`;
             content: prompt,
           },
         ],
-        temperature: 0.3,
-        max_tokens: 2000,
+        temperature: 0.2,
+        max_tokens: maxTokens,
       });
       console.log("OpenAI SDK request successful!");
     } catch (sdkError: any) {
@@ -96,8 +118,8 @@ ${text}`;
             content: prompt,
           },
         ],
-        temperature: 0.3,
-        max_tokens: 2000,
+        temperature: 0.2,
+        max_tokens: maxTokens,
       };
 
       const apiUrl = cleanBaseURL ? `${cleanBaseURL}/chat/completions` : "https://api.openai.com/v1/chat/completions";
