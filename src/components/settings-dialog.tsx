@@ -224,13 +224,13 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
               <SelectTrigger className="text-sm">
                 <SelectValue placeholder={t("settings.select_model")} />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
+              <SelectContent className="max-h-[200px] max-w-[calc(100vw-4rem)] sm:max-w-[calc(32rem-4rem)] w-[var(--radix-select-trigger-width)]">
                 {models.map((modelOption) => (
                   <SelectItem key={modelOption.id} value={modelOption.id} className="text-sm">
-                    <div className="flex items-center gap-2 w-full">
-                      <span className="truncate flex-1">{modelOption.id}</span>
+                    <div className="flex items-center gap-2 w-full min-w-0">
+                      <span className="truncate flex-1 min-w-0">{modelOption.id}</span>
                       {modelOption.owned_by && (
-                        <Badge variant="outline" className="text-xs flex-shrink-0">
+                        <Badge variant="outline" className="text-xs flex-shrink-0 max-w-[80px] truncate">
                           {modelOption.owned_by}
                         </Badge>
                       )}
