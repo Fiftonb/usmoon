@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, CheckCircle, XCircle, AlertTriangle, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/lib/i18n";
 
 interface ApiTestProps {
   apiKey: string;
@@ -18,12 +19,12 @@ export function ApiTest({ apiKey, baseURL, model }: ApiTestProps) {
     message: string;
   }>({ status: 'idle', message: '' });
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const testConnection = async () => {
     if (!apiKey.trim()) {
       toast({
-        title: "API Key Required",
-        description: "Please configure your API key first.",
+        description: t("toast.please_configure_api"),
         variant: "destructive",
       });
       return;
@@ -53,31 +54,31 @@ export function ApiTest({ apiKey, baseURL, model }: ApiTestProps) {
       if (response.ok) {
         setTestResult({
           status: 'success',
-          message: `Connection successful! Translation result: "${data.translatedText}"`
+          message: t("api_test.result_success", { result: data.translatedText })
         });
         toast({
-          title: "Test Successful",
-          description: "Your API configuration is working correctly.",
+          title: t("api_test.test_successful"),
+          description: t("api_test.test_successful_desc"),
         });
       } else {
         setTestResult({
           status: 'error',
-          message: data.error || 'Test failed'
+          message: data.error || t("api_test.test_failed")
         });
         toast({
-          title: "Test Failed",
-          description: data.error || "API test failed",
+          title: t("api_test.test_failed"),
+          description: data.error || t("api_test.test_failed"),
           variant: "destructive",
         });
       }
     } catch (error: any) {
       setTestResult({
         status: 'error',
-        message: error.message || 'Connection failed'
+        message: error.message || t("api_test.connection_error")
       });
       toast({
-        title: "Connection Error",
-        description: "Failed to connect to the API endpoint.",
+        title: t("api_test.connection_error"),
+        description: t("api_test.connection_error_desc"),
         variant: "destructive",
       });
     } finally {
@@ -101,13 +102,13 @@ export function ApiTest({ apiKey, baseURL, model }: ApiTestProps) {
   const getStatusBadge = () => {
     switch (testResult.status) {
       case 'success':
-        return <Badge className="bg-green-100 text-green-800 border-green-200">Connected</Badge>;
+        return <Badge className="bg-green-100 text-green-800 border-green-200">{t("api_test.status_connected")}</Badge>;
       case 'error':
-        return <Badge variant="destructive">Failed</Badge>;
+        return <Badge variant="destructive">{t("api_test.status_failed")}</Badge>;
       case 'warning':
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">Warning</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">{t("api_test.status_warning")}</Badge>;
       default:
-        return <Badge variant="outline">Not Tested</Badge>;
+        return <Badge variant="outline">{t("api_test.status_not_tested")}</Badge>;
     }
   };
 
@@ -117,14 +118,14 @@ export function ApiTest({ apiKey, baseURL, model }: ApiTestProps) {
         <CardTitle className="flex items-center justify-between text-lg">
           <div className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-primary animate-pulse" />
-            <span>API Connection Test</span>
+            <span>{t("api_test.title")}</span>
           </div>
           {getStatusBadge()}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span>Endpoint: {baseURL || "https://api.openai.com/v1"}</span>
+          <span>{t("api_test.endpoint", { url: baseURL || "https://api.openai.com/v1" })}</span>
         </div>
         
         {testResult.message && (
@@ -144,10 +145,10 @@ export function ApiTest({ apiKey, baseURL, model }: ApiTestProps) {
           {testing ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Testing Connection...
+              {t("api_test.testing")}
             </>
           ) : (
-            "Test API Connection"
+            t("api_test.test_button")
           )}
         </Button>
       </CardContent>

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 
 interface TranslateOptions {
   text: string;
@@ -8,6 +7,8 @@ interface TranslateOptions {
   apiKey: string;
   baseURL?: string;
   model?: string;
+  onSuccess?: () => void;
+  onError?: (message: string) => void;
 }
 
 interface TranslateResult {
@@ -22,7 +23,6 @@ export function useTranslate() {
     isLoading: false,
     error: null,
   });
-  const { toast } = useToast();
 
   const translate = async (options: TranslateOptions) => {
     setResult({
@@ -52,10 +52,7 @@ export function useTranslate() {
         error: null,
       });
 
-      toast({
-        title: "Translation completed",
-        description: "Text has been successfully translated.",
-      });
+      options.onSuccess?.();
     } catch (error: any) {
       const errorMessage = error.message || "Translation failed";
       setResult({
@@ -64,11 +61,7 @@ export function useTranslate() {
         error: errorMessage,
       });
 
-      toast({
-        title: "Translation failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      options.onError?.(errorMessage);
     }
   };
 

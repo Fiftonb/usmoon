@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { useToast } from "@/hooks/use-toast";
 
 interface Model {
   id: string;
@@ -12,7 +11,7 @@ interface UseModelsResult {
   models: Model[];
   isLoading: boolean;
   error: string | null;
-  fetchModels: (apiKey: string, baseURL?: string) => Promise<void>;
+  fetchModels: (apiKey: string, baseURL?: string, onSuccess?: (count: number) => void, onError?: (message: string, usesFallback: boolean) => void) => Promise<void>;
   clearModels: () => void;
 }
 
@@ -28,15 +27,10 @@ export function useModels(): UseModelsResult {
   const [models, setModels] = useState<Model[]>(fallbackModels);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
 
-  const fetchModels = useCallback(async (apiKey: string, baseURL?: string) => {
+  const fetchModels = useCallback(async (apiKey: string, baseURL?: string, onSuccess?: (count: number) => void, onError?: (message: string, usesFallback: boolean) => void) => {
     if (!apiKey.trim()) {
-      toast({
-        title: "API Key Required",
-        description: "Please enter your API key first.",
-        variant: "destructive",
-      });
+      onError?.("API Key Required", false);
       return;
     }
 
@@ -59,10 +53,7 @@ export function useModels(): UseModelsResult {
 
       if (response.ok && data.models) {
         setModels(data.models);
-        toast({
-          title: "Models Loaded",
-          description: `Found ${data.models.length} available models.`,
-        });
+        onSuccess?.(data.models.length);
       } else {
         throw new Error(data.error || "Failed to fetch models");
       }
@@ -73,15 +64,11 @@ export function useModels(): UseModelsResult {
       // Use fallback models on error
       setModels(fallbackModels);
       
-      toast({
-        title: "Using Fallback Models",
-        description: "Could not fetch models from API. Using common models instead.",
-        variant: "destructive",
-      });
+      onError?.(errorMessage, true);
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, []);
 
   const clearModels = useCallback(() => {
     setModels(fallbackModels);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,7 @@ import {
 import { Settings, AlertCircle, CheckCircle, RefreshCw, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useModels } from "@/hooks/use-models";
+import { useTranslation } from "@/lib/i18n";
 
 interface SettingsDialogProps {
   apiKey: string;
@@ -35,6 +36,7 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
   const [tempBaseURL, setTempBaseURL] = useState(baseURL);
   const [tempModel, setTempModel] = useState(model);
   const { toast } = useToast();
+  const { t } = useTranslation();
   const { models, isLoading: modelsLoading, fetchModels, clearModels } = useModels();
 
   useEffect(() => {
@@ -43,12 +45,36 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
     setTempModel(model);
   }, [apiKey, baseURL, model]);
 
+  // Stable callbacks for model fetching
+  const handleModelsSuccess = useCallback((count: number) => {
+    toast({
+      title: t("settings.models_loaded"),
+      description: t("settings.models_loaded_desc", { count }),
+    });
+  }, [t, toast]);
+
+  const handleModelsError = useCallback((message: string, usesFallback: boolean) => {
+    if (usesFallback) {
+      toast({
+        title: t("settings.using_fallback_models"),
+        description: t("settings.fallback_models_desc"),
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: t("settings.api_key_required"),
+        description: t("settings.api_key_required_desc"),
+        variant: "destructive",
+      });
+    }
+  }, [t, toast]);
+
   // Auto-fetch models when dialog opens and API key exists
   useEffect(() => {
     if (open && tempApiKey.trim()) {
-      fetchModels(tempApiKey, tempBaseURL);
+      fetchModels(tempApiKey, tempBaseURL, handleModelsSuccess, handleModelsError);
     }
-  }, [open, tempApiKey, tempBaseURL, fetchModels]);
+  }, [open]);
 
   const validateURL = (url: string) => {
     if (!url.trim()) return true; // Empty is OK
@@ -66,8 +92,8 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
   const handleSave = () => {
     if (!tempApiKey.trim()) {
       toast({
-        title: "API Key Required",
-        description: "Please enter your API key.",
+        title: t("settings.api_key_required"),
+        description: t("settings.api_key_required_desc"),
         variant: "destructive",
       });
       return;
@@ -75,8 +101,8 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
 
     if (!isValidURL) {
       toast({
-        title: "Invalid URL",
-        description: "Please enter a valid URL for the Base URL field.",
+        title: t("settings.invalid_url"),
+        description: t("settings.invalid_url_desc"),
         variant: "destructive",
       });
       return;
@@ -84,8 +110,8 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
 
     if (!tempModel) {
       toast({
-        title: "Model Required",
-        description: "Please select a model.",
+        title: t("settings.model_required_error"),
+        description: t("settings.model_required_desc"),
         variant: "destructive",
       });
       return;
@@ -94,8 +120,7 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
     onSave(tempApiKey.trim(), tempBaseURL.trim(), tempModel);
     setOpen(false);
     toast({
-      title: "Settings Saved",
-      description: "Your API configuration has been saved.",
+      description: t("toast.settings_saved"),
     });
   };
 
@@ -107,17 +132,17 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
     setOpen(false);
   };
 
-  const handleRefreshModels = () => {
+  const handleRefreshModels = useCallback(() => {
     if (tempApiKey.trim()) {
-      fetchModels(tempApiKey, tempBaseURL);
+      fetchModels(tempApiKey, tempBaseURL, handleModelsSuccess, handleModelsError);
     } else {
       toast({
-        title: "API Key Required",
-        description: "Please enter your API key first.",
+        title: t("settings.api_key_required"),
+        description: t("settings.api_key_required_desc"),
         variant: "destructive",
       });
     }
-  };
+  }, [tempApiKey, tempBaseURL, fetchModels, handleModelsSuccess, handleModelsError, t, toast]);
 
   const commonEndpoints = [
     { name: "OpenAI Official", url: "https://api.openai.com/v1" },
@@ -134,17 +159,17 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>API Settings</DialogTitle>
+          <DialogTitle>{t("settings.title")}</DialogTitle>
           <DialogDescription>
-            Configure your OpenAI-compatible API settings for translation.
+            {t("settings.description")}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="apiKey">API Key *</Label>
+            <Label htmlFor="apiKey">{t("settings.api_key")} *</Label>
             <Textarea
               id="apiKey"
-              placeholder="sk-..."
+              placeholder={t("settings.api_key_placeholder")}
               value={tempApiKey}
               onChange={(e) => setTempApiKey(e.target.value)}
               className="resize-none"
@@ -152,15 +177,15 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
             />
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <CheckCircle className="h-4 w-4" />
-              <span>Your API key is stored locally and never sent to our servers</span>
+              <span>{t("settings.security_note")}</span>
             </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="baseURL">Base URL (Optional)</Label>
+            <Label htmlFor="baseURL">{t("settings.base_url_optional")}</Label>
             <Textarea
               id="baseURL"
-              placeholder="https://api.openai.com/v1"
+              placeholder={t("settings.base_url_placeholder")}
               value={tempBaseURL}
               onChange={(e) => setTempBaseURL(e.target.value)}
               className={`resize-none ${!isValidURL ? 'border-destructive' : ''}`}
@@ -169,17 +194,17 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
             {!isValidURL && (
               <div className="flex items-center gap-2 text-sm text-destructive">
                 <AlertCircle className="h-4 w-4" />
-                <span>Please enter a valid URL</span>
+                <span>{t("settings.valid_url_note")}</span>
               </div>
             )}
             <p className="text-sm text-muted-foreground">
-              Leave empty to use OpenAI default. For custom endpoints, include the full URL.
+              {t("settings.base_url_note")}
             </p>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="model">AI Model *</Label>
+              <Label htmlFor="model">{t("settings.model_required")} *</Label>
               <Button
                 variant="outline"
                 size="sm"
@@ -191,12 +216,12 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
                 ) : (
                   <RefreshCw className="h-4 w-4" />
                 )}
-                <span className="ml-2">Refresh</span>
+                <span className="ml-2">{t("settings.refresh")}</span>
               </Button>
             </div>
             <Select value={tempModel} onValueChange={setTempModel}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a model" />
+                <SelectValue placeholder={t("settings.select_model")} />
               </SelectTrigger>
               <SelectContent>
                 {models.map((modelOption) => (
@@ -215,17 +240,17 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
             </Select>
             
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>Showing {models.length} available models</span>
+              <span>{t("settings.models_count", { count: models.length })}</span>
               {modelsLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             </div>
             
             <p className="text-sm text-muted-foreground">
-              Models are fetched from your API endpoint. Click refresh to update the list.
+              {t("settings.models_note")}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label>Common Endpoints</Label>
+            <Label>{t("settings.common_endpoints")}</Label>
             <div className="flex flex-wrap gap-2">
               {commonEndpoints.map((endpoint) => (
                 <Badge
@@ -241,21 +266,21 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
           </div>
 
           <div className="bg-muted/50 rounded-md p-3 space-y-2">
-            <div className="font-medium text-sm">💡 Dynamic Model Loading:</div>
+            <div className="font-medium text-sm">{t("settings.dynamic_loading_title")}</div>
             <ul className="text-sm text-muted-foreground space-y-1">
-              <li>• Models are automatically fetched from your API endpoint</li>
-              <li>• Click "Refresh" to reload available models</li>
-              <li>• If fetching fails, fallback models will be shown</li>
-              <li>• Different endpoints may have different available models</li>
+              <li>• {t("settings.dynamic_loading_notes.0")}</li>
+              <li>• {t("settings.dynamic_loading_notes.1")}</li>
+              <li>• {t("settings.dynamic_loading_notes.2")}</li>
+              <li>• {t("settings.dynamic_loading_notes.3")}</li>
             </ul>
           </div>
         </div>
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={handleCancel}>
-            Cancel
+            {t("settings.cancel")}
           </Button>
           <Button onClick={handleSave} disabled={!isValidURL || !tempModel}>
-            Save
+            {t("settings.save")}
           </Button>
         </div>
       </DialogContent>

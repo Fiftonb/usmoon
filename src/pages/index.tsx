@@ -26,6 +26,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { useTranslation } from "@/lib/i18n";
 
 export default function Home() {
   const [inputText, setInputText] = useState("");
@@ -35,6 +37,7 @@ export default function Home() {
   const [baseURL, setBaseURL] = useState("https://api.openai.com/v1");
   const [model, setModel] = useState("gpt-3.5-turbo");
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Load settings from localStorage
   useEffect(() => {
@@ -59,7 +62,7 @@ export default function Home() {
     if (!inputText.trim()) {
       toast({
         variant: "destructive",
-        description: "Please enter text to translate",
+        description: t("toast.please_enter_text"),
       });
       return;
     }
@@ -67,7 +70,7 @@ export default function Home() {
     if (!apiKey) {
       toast({
         variant: "destructive", 
-        description: "Please configure your API key in settings",
+        description: t("toast.please_configure_api"),
       });
       return;
     }
@@ -78,7 +81,19 @@ export default function Home() {
       targetLang,
       apiKey,
       baseURL,
-      model
+      model,
+      onSuccess: () => {
+        toast({
+          description: t("toast.translate_success"),
+        });
+      },
+      onError: (message) => {
+        toast({
+          title: t("toast.translate_failed"),
+          description: message,
+          variant: "destructive",
+        });
+      }
     });
   };
 
@@ -98,12 +113,12 @@ export default function Home() {
     try {
       await navigator.clipboard.writeText(text);
       toast({
-        description: "Copied to clipboard",
+        description: t("toast.copy_success"),
       });
     } catch (err) {
       toast({
         variant: "destructive",
-        description: "Failed to copy text",
+        description: t("toast.copy_failed"),
       });
     }
   };
@@ -118,7 +133,7 @@ export default function Home() {
     localStorage.setItem("openai-model", newModel);
     
     toast({
-      description: "Settings saved successfully",
+      description: t("toast.settings_saved"),
     });
   };
 
@@ -143,13 +158,13 @@ export default function Home() {
               <div className="absolute inset-0 h-10 w-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur-md opacity-30 animate-pulse-gentle"></div>
             </div>
             <h1 className="text-5xl lg:text-6xl font-bold gradient-text">
-              AI Translator
+              {t("common.ai_translator")}
             </h1>
           </div>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Experience the power of AI-driven translation with stunning visual design
+            {t("common.experience_power")}
             <br />
-            <span className="text-sm opacity-75">Supporting multiple languages with OpenAI-compatible APIs</span>
+            <span className="text-sm opacity-75">{t("common.supporting_languages")}</span>
           </p>
           
           {/* 装饰性元素 */}
@@ -162,6 +177,9 @@ export default function Home() {
 
         {/* Settings */}
         <div className="flex justify-end items-center gap-3 mb-8 animate-slide-in" style={{ animationDelay: '0.1s' }}>
+          <div className="hover-float">
+            <LanguageSwitcher />
+          </div>
           <div className="hover-float">
             <ThemeToggle />
           </div>
@@ -180,7 +198,7 @@ export default function Home() {
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="flex-1">
-                <label className="text-sm font-medium mb-2 block">From</label>
+                <label className="text-sm font-medium mb-2 block">{t("translation.source_language")}</label>
                 <Select value={sourceLang} onValueChange={setSourceLang}>
                   <SelectTrigger className="glass-effect border-animate">
                     <SelectValue />
@@ -188,7 +206,7 @@ export default function Home() {
                   <SelectContent>
                     {sourceLanguages.map((lang) => (
                       <SelectItem key={lang.code} value={lang.code}>
-                        {getLanguageName(lang.code)}
+                        {t(`languages.${lang.code}` as any) || getLanguageName(lang.code)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -208,7 +226,7 @@ export default function Home() {
               </div>
               
               <div className="flex-1">
-                <label className="text-sm font-medium mb-2 block">To</label>
+                <label className="text-sm font-medium mb-2 block">{t("translation.target_language")}</label>
                 <Select value={targetLang} onValueChange={setTargetLang}>
                   <SelectTrigger className="glass-effect border-animate">
                     <SelectValue />
@@ -216,7 +234,7 @@ export default function Home() {
                   <SelectContent>
                     {targetLanguages.map((lang) => (
                       <SelectItem key={lang.code} value={lang.code}>
-                        {getLanguageName(lang.code)}
+                        {t(`languages.${lang.code}` as any) || getLanguageName(lang.code)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -232,22 +250,22 @@ export default function Home() {
           <Card className="card-hover glass-effect shadow-elegant animate-slide-in" style={{ animationDelay: '0.4s' }}>
             <CardHeader>
               <CardTitle className="text-lg font-semibold">
-                Input Text
+                {t("translation.input_text")}
                 <Badge variant="secondary" className="ml-2 text-xs">
-                  {getLanguageName(sourceLang)}
+                  {t(`languages.${sourceLang}` as any) || getLanguageName(sourceLang)}
                 </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Textarea
-                placeholder="Enter text to translate..."
+                placeholder={t("translation.input_placeholder")}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 className="min-h-[200px] resize-none glass-effect border-animate focus:shadow-luxury transition-all duration-300"
               />
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">
-                  {inputText.length} characters
+                  {inputText.length} {t("common.characters")}
                 </span>
                 <div className="flex gap-2">
                   <Button
@@ -257,7 +275,7 @@ export default function Home() {
                     className="hover-float"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Clear
+                    {t("translation.clear_button")}
                   </Button>
                   <Button
                     onClick={handleTranslate}
@@ -267,12 +285,12 @@ export default function Home() {
                     {isLoading ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Translating...
+                        {t("translation.translate_button")}...
                       </>
                     ) : (
                       <>
                         <Zap className="h-4 w-4 mr-2" />
-                        Translate
+                        {t("translation.translate_button")}
                       </>
                     )}
                   </Button>
@@ -285,9 +303,9 @@ export default function Home() {
           <Card className="card-hover glass-effect shadow-elegant animate-slide-in" style={{ animationDelay: '0.5s' }}>
             <CardHeader>
               <CardTitle className="text-lg font-semibold">
-                Translation Result
+                {t("translation.translation_result")}
                 <Badge variant="secondary" className="ml-2 text-xs">
-                  {getLanguageName(targetLang)}
+                  {t(`languages.${targetLang}` as any) || getLanguageName(targetLang)}
                 </Badge>
               </CardTitle>
             </CardHeader>
@@ -305,7 +323,7 @@ export default function Home() {
                    <div className="whitespace-pre-wrap text-sm leading-relaxed">{translatedText}</div>
                  ) : (
                    <div className="text-muted-foreground text-sm italic">
-                     Translation will appear here...
+                     {t("translation.no_result")}
                    </div>
                  )}
                </div>
@@ -318,7 +336,7 @@ export default function Home() {
                    className="hover-float"
                  >
                    <Copy className="h-4 w-4 mr-2" />
-                   Copy
+                   {t("translation.copy_button")}
                  </Button>
                </div>
             </CardContent>
@@ -335,7 +353,7 @@ export default function Home() {
            <Card className="glass-effect shadow-elegant border-destructive/50 animate-slide-in" style={{ animationDelay: '0.6s' }}>
              <CardContent className="pt-6">
                <div className="text-destructive text-sm">
-                 <strong>Error:</strong> {error}
+                 <strong>{t("common.error")}:</strong> {error}
                </div>
              </CardContent>
            </Card>
