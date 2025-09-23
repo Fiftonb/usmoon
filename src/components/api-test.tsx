@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, AlertTriangle, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ApiTestProps {
@@ -112,10 +112,13 @@ export function ApiTest({ apiKey, baseURL, model }: ApiTestProps) {
   };
 
   return (
-    <Card className="mt-4">
+    <Card className="mb-8 border-animate glass-effect shadow-elegant card-hover animate-slide-in" style={{ animationDelay: '0.5s' }}>
       <CardHeader>
         <CardTitle className="flex items-center justify-between text-lg">
-          <span>API Connection Test</span>
+          <div className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-primary animate-pulse" />
+            <span>API Connection Test</span>
+          </div>
           {getStatusBadge()}
         </CardTitle>
       </CardHeader>
@@ -136,7 +139,7 @@ export function ApiTest({ apiKey, baseURL, model }: ApiTestProps) {
         <Button
           onClick={testConnection}
           disabled={testing || !apiKey.trim()}
-          className="w-full"
+          className="w-full btn-modern hover-float"
         >
           {testing ? (
             <>

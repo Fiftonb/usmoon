@@ -175,11 +175,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* API Test Section - Show when API key is configured */}
-        {apiKey && (
-          <ApiTest apiKey={apiKey} baseURL={baseURL} model={model} />
-        )}
-
         {/* Language Selection */}
         <Card className="mb-8 border-animate glass-effect shadow-elegant card-hover animate-slide-in" style={{ animationDelay: '0.3s' }}>
           <CardContent className="pt-6">
@@ -329,6 +324,11 @@ export default function Home() {
             </CardContent>
           </Card>
         </div>
+
+        {/* API Test Section - Show when API key is configured */}
+        {apiKey && (
+          <ApiTest apiKey={apiKey} baseURL={baseURL} model={model} />
+        )}
 
                  {/* Error Display */}
          {error && (
