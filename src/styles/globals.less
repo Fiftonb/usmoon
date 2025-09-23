@@ -101,9 +101,24 @@
   }
 }
 
+/* 防止滚动条导致的布局抖动 - 核心解决方案 */
+html {
+  /* 始终保留滚动条位置，防止布局抖动 */
+  overflow-y: scroll;
+  /* 为了兼容性，同时设置滚动条的宽度补偿 */
+  scrollbar-gutter: stable;
+}
+
+/* 现代浏览器的滚动条补偿方案 */
+body {
+  /* 通过计算视口宽度和内容宽度的差值来补偿滚动条宽度 */
+  padding-right: calc(100vw - 100%);
+  margin-right: calc(-1 * (100vw - 100%));
+}
+
 /* 优雅的滚动条样式 */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -112,7 +127,7 @@
 
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--border));
-  border-radius: 2px;
+  border-radius: 3px;
   transition: background 0.2s ease;
 }
 
@@ -135,17 +150,17 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* 更新主容器样式，移除冲突的overflow设置 */
 html, body, main, #root {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
   touch-action: pan-y;
   -webkit-overflow-scrolling: touch;
 }
 
+/* Firefox滚动条样式 */
 body {
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--border)) transparent;
@@ -350,6 +365,35 @@ strong {
   }
 }
 
+/* 语言切换过渡效果 - 防抖动 */
+.language-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 语言切换状态下的特殊处理 */
+.language-switching {
+  overflow-x: hidden !important;
+  scroll-behavior: auto !important;
+}
+
+.language-switching * {
+  pointer-events: none;
+}
+
+/* 页面内容区域稳定化 */
+.page-content {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 @layer utilities {
-  /* 其他工具类可以在这里添加 */
+  /* 防止布局抖动的工具类 */
+  .stable-scrollbar {
+    scrollbar-gutter: stable;
+  }
+  
+  .no-layout-shift {
+    width: calc(100vw - (100vw - 100%));
+  }
 }
