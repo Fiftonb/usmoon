@@ -27,6 +27,35 @@ export interface Translations {
     swap_languages: string;
     translation_result: string;
     no_result: string;
+    text_input_tab: string;
+    ocr_upload_tab: string;
+  };
+  ocr: {
+    title: string;
+    description: string;
+    ocr_language: string;
+    ocr_language_tooltip: string;
+    translate_to: string;
+    translate_to_tooltip: string;
+    select_language: string;
+    select_target: string;
+    click_drag_image: string;
+    file_format_info: string;
+    preview: string;
+    extract_text: string;
+    processing: string;
+    clear: string;
+    translating: string;
+    translate_to_lang: string;
+    extracted_text: string;
+    characters: string;
+    processing_image: string;
+    text_extracted_success: string;
+    confidence: string;
+    no_text_found: string;
+    no_text_detected: string;
+    ocr_error: string;
+    failed_extract_text: string;
   };
   settings: {
     title: string;
@@ -126,6 +155,18 @@ export interface Translations {
     fi: string;
     pl: string;
     tr: string;
+  };
+  ocr_languages: {
+    eng: string;
+    chi_sim: string;
+    chi_tra: string;
+    jpn: string;
+    kor: string;
+    spa: string;
+    fra: string;
+    deu: string;
+    rus: string;
+    ara: string;
   };
 }
 

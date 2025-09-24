@@ -356,11 +356,11 @@ export default function Home() {
                   <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="text" className="flex items-center gap-2">
                       <Type className="h-4 w-4" />
-                      Text Input
+                      {t("translation.text_input_tab")}
                     </TabsTrigger>
                     <TabsTrigger value="ocr" className="flex items-center gap-2">
                       <FileImage className="h-4 w-4" />
-                      OCR Upload
+                      {t("translation.ocr_upload_tab")}
                     </TabsTrigger>
                   </TabsList>
                   

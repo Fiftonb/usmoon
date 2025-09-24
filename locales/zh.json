@@ -23,7 +23,36 @@
     "copy_button": "复制",
     "swap_languages": "交换语言",
     "translation_result": "翻译结果",
-    "no_result": "还没有翻译结果。输入一些文本并点击翻译开始使用。"
+    "no_result": "还没有翻译结果。输入一些文本并点击翻译开始使用。",
+    "text_input_tab": "文本输入",
+    "ocr_upload_tab": "OCR 上传"
+  },
+  "ocr": {
+    "title": "OCR 文字识别",
+    "description": "上传图片提取文字，然后进行翻译",
+    "ocr_language": "OCR 语言",
+    "ocr_language_tooltip": "选择图片中文字的语言以提高识别准确度。",
+    "translate_to": "翻译到",
+    "translate_to_tooltip": "翻译的目标语言。",
+    "select_language": "选择语言",
+    "select_target": "选择目标",
+    "click_drag_image": "点击或拖拽图片到这里",
+    "file_format_info": "支持 PNG、JPG、WEBP，最大 10MB",
+    "preview": "预览",
+    "extract_text": "提取文字",
+    "processing": "处理中...",
+    "clear": "清除",
+    "translating": "翻译中...",
+    "translate_to_lang": "翻译到{{language}}",
+    "extracted_text": "提取的文字：",
+    "characters": "字符",
+    "processing_image": "正在处理图片...",
+    "text_extracted_success": "文字提取成功",
+    "confidence": "置信度：{{confidence}}%",
+    "no_text_found": "未找到文字",
+    "no_text_detected": "图片中未检测到文字",
+    "ocr_error": "OCR 错误",
+    "failed_extract_text": "文字提取失败"
   },
   "settings": {
     "title": "API 设置",
@@ -123,5 +152,17 @@
     "fi": "芬兰语",
     "pl": "波兰语",
     "tr": "土耳其语"
+  },
+  "ocr_languages": {
+    "eng": "英语",
+    "chi_sim": "简体中文",
+    "chi_tra": "繁体中文",
+    "jpn": "日语",
+    "kor": "韩语",
+    "spa": "西班牙语",
+    "fra": "法语",
+    "deu": "德语",
+    "rus": "俄语",
+    "ara": "阿拉伯语"
   }
 } 

@@ -23,7 +23,36 @@
     "copy_button": "Copy",
     "swap_languages": "Swap languages",
     "translation_result": "Translation Result",
-    "no_result": "No translation result yet. Enter some text and click translate to get started."
+    "no_result": "No translation result yet. Enter some text and click translate to get started.",
+    "text_input_tab": "Text Input",
+    "ocr_upload_tab": "OCR Upload"
+  },
+  "ocr": {
+    "title": "OCR Text Recognition",
+    "description": "Upload an image to extract text, then translate it",
+    "ocr_language": "OCR Language",
+    "ocr_language_tooltip": "Select the language of text in your image for better accuracy.",
+    "translate_to": "Translate To",
+    "translate_to_tooltip": "Target language for translation.",
+    "select_language": "Select language",
+    "select_target": "Select target",
+    "click_drag_image": "Click or drag image here",
+    "file_format_info": "PNG, JPG, WEBP up to 10MB",
+    "preview": "Preview",
+    "extract_text": "Extract Text",
+    "processing": "Processing...",
+    "clear": "Clear",
+    "translating": "Translating...",
+    "translate_to_lang": "Translate to {{language}}",
+    "extracted_text": "Extracted Text:",
+    "characters": "characters",
+    "processing_image": "Processing image...",
+    "text_extracted_success": "Text extracted successfully",
+    "confidence": "Confidence: {{confidence}}%",
+    "no_text_found": "No text found",
+    "no_text_detected": "No text was detected in the image",
+    "ocr_error": "OCR Error",
+    "failed_extract_text": "Failed to extract text"
   },
   "settings": {
     "title": "API Settings",
@@ -123,5 +152,17 @@
     "fi": "Finnish",
     "pl": "Polish",
     "tr": "Turkish"
+  },
+  "ocr_languages": {
+    "eng": "English",
+    "chi_sim": "Chinese Simplified",
+    "chi_tra": "Chinese Traditional",
+    "jpn": "Japanese",
+    "kor": "Korean",
+    "spa": "Spanish",
+    "fra": "French",
+    "deu": "German",
+    "rus": "Russian",
+    "ara": "Arabic"
   }
 } 
