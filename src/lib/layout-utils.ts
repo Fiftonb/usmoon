@@ -35,13 +35,19 @@ export function stabilizeLayout(): void {
   const html = document.documentElement;
   const body = document.body;
   
-  // 为html元素添加稳定化样式
+  // 为html元素添加稳定化样式，但不设置滚动相关属性
   html.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
-  html.style.setProperty('scrollbar-gutter', 'stable');
   
-  // 为body元素添加补偿样式
-  body.style.setProperty('padding-right', `calc(100vw - 100%)`);
-  body.style.setProperty('margin-right', `calc(-1 * (100vw - 100%))`);
+  // 确保html和body都隐藏滚动条，滚动由内部容器处理
+  html.style.overflow = 'hidden';
+  body.style.overflow = 'hidden';
+  
+  // 移除可能导致水平滚动的padding和margin
+  body.style.removeProperty('padding-right');
+  body.style.removeProperty('margin-right');
+  
+  // 确保body添加no-scroll类
+  body.classList.add('no-scroll');
 }
 
 /**

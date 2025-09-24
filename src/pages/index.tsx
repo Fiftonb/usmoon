@@ -167,7 +167,7 @@ export default function Home() {
   const targetLanguages = languages.filter(lang => lang.code !== "auto");
 
   return (
-    <div className="h-screen bg-background relative animate-scale-in page-content">
+    <div className="h-screen w-screen bg-background relative animate-scale-in page-content overflow-hidden">
       {/* 现代化背景层 */}
       <div className="pointer-events-none absolute inset-0 bg-dot-pattern [mask-image:linear-gradient(to_bottom,rgba(0,0,0,0.15),rgba(0,0,0,1))] dark:[mask-image:linear-gradient(to_bottom,rgba(255,255,255,0.08),rgba(255,255,255,1))]"></div>
       
@@ -175,7 +175,7 @@ export default function Home() {
       <div className="pointer-events-none absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse-gentle"></div>
       <div className="pointer-events-none absolute bottom-0 right-1/4 w-80 h-80 bg-gradient-to-r from-green-400/20 via-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-float"></div>
       
-      <div className="h-full overflow-y-auto" id="page-scroll-container">
+      <div className="h-full w-full overflow-y-auto overflow-x-hidden" id="page-scroll-container">
         <div className="container mx-auto px-4 py-8 relative z-10 stable-scrollbar min-h-full">
           {/* Header */}
           <div className="text-center mb-12 animate-slide-in">
