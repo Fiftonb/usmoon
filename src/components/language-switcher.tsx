@@ -27,6 +27,7 @@ export function LanguageSwitcher() {
   const router = useRouter();
   const { t, locale } = useTranslation();
   const [isChanging, setIsChanging] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLanguageChange = async (newLocale: string) => {
     if (newLocale === locale || isChanging) return;
@@ -43,7 +44,8 @@ export function LanguageSwitcher() {
       await smoothLanguageTransition(async () => {
         await router.push({ pathname, query }, asPath, { 
           locale: newLocale,
-          shallow: false 
+          shallow: false,
+          scroll: false
         });
       });
       
@@ -60,7 +62,21 @@ export function LanguageSwitcher() {
   return (
     <TooltipProvider>
       <Tooltip>
-        <DropdownMenu>
+        <DropdownMenu
+          open={menuOpen}
+          onOpenChange={(open) => {
+            if (typeof window !== 'undefined' && open) {
+              const container = document.getElementById('page-scroll-container');
+              if (container) {
+                const currentY = container.scrollTop;
+                requestAnimationFrame(() => {
+                  container.scrollTop = currentY;
+                });
+              }
+            }
+            setMenuOpen(open);
+          }}
+        >
           <DropdownMenuTrigger asChild>
             <TooltipTrigger asChild>
               <Button
@@ -71,6 +87,7 @@ export function LanguageSwitcher() {
                 className={`relative overflow-hidden group language-transition ${
                   isChanging ? 'opacity-70 cursor-not-allowed' : ''
                 }`}
+                type="button"
               >
                 <div className={`relative z-10 transition-all duration-300 ${
                   isChanging ? 'animate-spin' : ''

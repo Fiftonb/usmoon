@@ -107,6 +107,10 @@ html {
   overflow-y: scroll;
   /* 为了兼容性，同时设置滚动条的宽度补偿 */
   scrollbar-gutter: stable;
+  /* 禁用 CSS 滚动锚定，避免焦点/内容变更导致的跳动 */
+  overflow-anchor: none;
+  /* 避免浏览器平滑滚动与焦点一起触发位移 */
+  scroll-behavior: auto;
 }
 
 /* 现代浏览器的滚动条补偿方案 */
@@ -114,6 +118,8 @@ body {
   /* 通过计算视口宽度和内容宽度的差值来补偿滚动条宽度 */
   padding-right: calc(100vw - 100%);
   margin-right: calc(-1 * (100vw - 100%));
+  /* 禁用滚动锚定，防止焦点更改触发滚动 */
+  overflow-anchor: none;
 }
 
 /* 优雅的滚动条样式 */
@@ -147,7 +153,6 @@ body {
   outline: 0;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* 更新主容器样式，移除冲突的overflow设置 */
@@ -157,7 +162,6 @@ html, body, main, #root {
   width: 100%;
   height: 100%;
   touch-action: pan-y;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* Firefox滚动条样式 */
@@ -367,7 +371,7 @@ strong {
 
 /* 语言切换过渡效果 - 防抖动 */
 .language-transition {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* 语言切换状态下的特殊处理 */
@@ -396,4 +400,60 @@ strong {
   .no-layout-shift {
     width: calc(100vw - (100vw - 100%));
   }
+}
+
+/* 页面滚动容器样式优化 */
+#page-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+#page-scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+#page-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#page-scroll-container::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+#page-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+.dark #page-scroll-container::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+}
+
+.dark #page-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* 固定定位的下拉菜单和提示框，避免与页面滚动交互 */
+.fixed-dropdown,
+.fixed-tooltip {
+  z-index: 9999 !important;
+}
+
+/* 下拉菜单内容区域独立滚动 */
+.fixed-dropdown {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* 固定定位的对话框 */
+.fixed-dialog {
+  z-index: 9999 !important;
+}
+
+/* 当body被设置为overflow:hidden时，确保内容区域可滚动 */
+body.no-scroll {
+  overflow: hidden !important;
+  height: 100vh !important;
+  width: 100vw !important;
 }
