@@ -532,19 +532,69 @@ body.no-scroll {
   }
 }
 
-/* 翻译结果卡片高亮动画 */
+/* 翻译结果卡片高亮动画 - 简化版本，避免重排 */
 @keyframes highlight-translation {
   0% {
-    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
+    border-color: hsl(var(--border));
   }
   50% {
-    box-shadow: 0 0 0 8px hsl(var(--primary) / 0.1);
+    border-color: hsl(var(--primary) / 0.6);
   }
   100% {
-    box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
+    border-color: hsl(var(--border));
   }
 }
 
 .translation-highlight {
   animation: highlight-translation 1.5s ease-out;
+}
+
+/* 翻译结果卡片稳定性优化 */
+[data-translation-result] {
+  /* 确保卡片在状态变化时保持稳定 */
+  backface-visibility: hidden;
+  /* 使用硬件加速 */
+  transform: translateZ(0);
+}
+
+/* 防止翻译过程中的布局跳动 */
+.translation-stable {
+  /* 保持固定的最小尺寸 */
+  min-height: 300px;
+  /* 平滑的状态过渡 */
+  transition: all 0.2s ease-in-out;
+  /* 防止内容溢出导致的布局变化 */
+  overflow: hidden;
+}
+
+.translation-stable .translation-content {
+  /* 内容区域的平滑过渡 */
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+/* 翻译加载状态的平滑过渡 */
+.translation-loading {
+  opacity: 0.8;
+}
+
+.translation-loading .translation-content {
+  transform: translateY(2px);
+}
+
+/* 翻译结果加载覆盖层 */
+.translation-content .loading-overlay {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.translation-content .loading-overlay.fade-in {
+  animation: fadeInOverlay 0.3s ease-in-out;
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

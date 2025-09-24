@@ -25,11 +25,11 @@ export function useTranslate() {
   });
 
   const translate = async (options: TranslateOptions) => {
-    setResult({
-      translatedText: null,
+    setResult(prev => ({
+      translatedText: prev.translatedText, // 保持旧的翻译内容，避免闪烁
       isLoading: true,
       error: null,
-    });
+    }));
 
     try {
       const response = await fetch("/api/translate", {

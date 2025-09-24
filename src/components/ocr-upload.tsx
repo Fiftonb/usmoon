@@ -168,17 +168,8 @@ export function OCRUpload({ onTextExtracted, onTranslateRequest }: OCRUploadProp
     setIsTranslating(true);
     try {
       await onTranslateRequest(extractedText, targetLanguage);
-      toast({
-        title: "Translation completed",
-        description: "Text has been translated successfully",
-      });
-      
-      // On mobile, scroll to top after translation to show result
-      if (window.innerWidth < 1024) {
-        setTimeout(() => {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }, 500);
-      }
+      // 不显示额外的toast，因为主页面已经显示了成功消息
+      // 也不执行额外的滚动，因为主页面已经处理了滚动逻辑
     } catch (error) {
       toast({
         title: "Translation failed",

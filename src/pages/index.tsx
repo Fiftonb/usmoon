@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Head from "next/head";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -169,73 +170,47 @@ export default function Home() {
 
   const handleOCRTextExtracted = (text: string) => {
     setInputText(text);
-    reset(); // Clear any previous translation
+    // 不自动清除翻译结果，让用户决定是否需要重新翻译
   };
 
   const handleOCRTranslateRequest = async (text: string, targetLang: string) => {
     setInputText(text);
     setTargetLang(targetLang);
-    reset(); // Clear any previous translation
+    // 不调用reset()，让translate函数自然地处理状态转换，避免组件闪烁
     
-    // Wait a bit for state to update, then translate
-    setTimeout(async () => {
-      await translate({
-        text: text,
-        sourceLang: "auto", // Let AI detect source language
-        targetLang: targetLang,
-        apiKey,
-        baseURL,
-        model,
-        onSuccess: () => {
-          toast({
-            description: t("toast.translate_success"),
-          });
-          // Auto-scroll to translation result after successful translation
-          setTimeout(() => {
-            const translationCard = document.querySelector('[data-translation-result]');
-            if (translationCard) {
-              // Add highlight animation
-              translationCard.classList.add('translation-highlight');
-              
-              // Different scroll behavior for desktop and mobile
-              if (window.innerWidth >= 1024) {
-                // On desktop, scroll to translation result
-                translationCard.scrollIntoView({ 
-                  behavior: 'smooth', 
-                  block: 'start',
-                  inline: 'nearest'
-                });
-              } else {
-                // On mobile, scroll to top to show language selection and result
-                const container = document.getElementById("page-scroll-container");
-                if (container) {
-                  container.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-              }
-              
-              // Remove highlight class after animation
-              setTimeout(() => {
-                translationCard.classList.remove('translation-highlight');
-              }, 1500);
-            }
-          }, 300);
-        },
-        onError: (message) => {
-          toast({
-            title: t("toast.translate_failed"),
-            description: message,
-            variant: "destructive",
-          });
-        }
-      });
-    }, 100);
+    // 立即开始翻译，translate函数内部会设置loading状态
+    await translate({
+      text: text,
+      sourceLang: "auto", // Let AI detect source language
+      targetLang: targetLang,
+      apiKey,
+      baseURL,
+      model,
+      onSuccess: () => {
+        // 简化处理，只显示成功提示，暂时移除滚动和动画
+        toast({
+          description: t("toast.translate_success"),
+        });
+      },
+      onError: (message) => {
+        toast({
+          title: t("toast.translate_failed"),
+          description: message,
+          variant: "destructive",
+        });
+      }
+    });
   };
 
   const sourceLanguages = languages;
   const targetLanguages = languages.filter(lang => lang.code !== "auto");
 
   return (
-    <div className="h-screen w-screen bg-background relative animate-scale-in page-content overflow-hidden">
+    <>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      </Head>
+      <div className="h-screen w-screen bg-background relative animate-scale-in page-content overflow-hidden">
       {/* 现代化背景层 */}
       <div className="pointer-events-none absolute inset-0 bg-dot-pattern [mask-image:linear-gradient(to_bottom,rgba(0,0,0,0.15),rgba(0,0,0,1))] dark:[mask-image:linear-gradient(to_bottom,rgba(255,255,255,0.08),rgba(255,255,255,1))]"></div>
       
@@ -420,8 +395,12 @@ export default function Home() {
 
             {/* Output */}
             <Card 
-              className="card-hover glass-effect shadow-elegant animate-slide-in lg:sticky lg:top-4 lg:self-start smooth-scroll-target" 
-              style={{ animationDelay: '0.5s' }}
+              key="translation-result-card" // 添加稳定的key
+              className="card-hover glass-effect shadow-elegant animate-slide-in lg:sticky lg:top-4 lg:self-start smooth-scroll-target translation-stable"
+              style={{ 
+                animationDelay: '0.5s',
+                minHeight: '300px'
+              }}
               data-translation-result
             >
               <CardHeader>
@@ -433,20 +412,27 @@ export default function Home() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="min-h-[200px] p-4 rounded-md bg-muted/30 border border-border/50 glass-effect">
-                  {isLoading ? (
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
-                    </div>
-                  ) : error ? (
-                    <div className="text-destructive text-sm">{error}</div>
-                  ) : translatedText ? (
-                    <div className="whitespace-pre-wrap text-sm leading-relaxed">{translatedText}</div>
-                  ) : (
-                    <div className="text-muted-foreground text-sm italic">
-                      {t("translation.no_result")}
+                <div className="min-h-[200px] p-4 rounded-md bg-muted/30 border border-border/50 glass-effect translation-content relative">
+                  {/* 翻译内容区域 */}
+                  <div className={`transition-opacity duration-300 ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
+                    {error ? (
+                      <div className="text-destructive text-sm">{error}</div>
+                    ) : translatedText ? (
+                      <div className="whitespace-pre-wrap text-sm leading-relaxed">{translatedText}</div>
+                    ) : (
+                      <div className="text-muted-foreground text-sm italic">
+                        {t("translation.no_result")}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* 加载指示器覆盖层 */}
+                  {isLoading && (
+                    <div className="absolute top-2 right-2 z-10">
+                      <div className="flex items-center space-x-2 bg-background/80 backdrop-blur-sm rounded-full px-3 py-1 border border-border/50">
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
+                        <span className="text-xs text-muted-foreground">翻译中...</span>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -484,5 +470,6 @@ export default function Home() {
         </div>
       </div>
     </div>
+    </>
   );
 }
