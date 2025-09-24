@@ -172,6 +172,13 @@ export function OCRUpload({ onTextExtracted, onTranslateRequest }: OCRUploadProp
         title: "Translation completed",
         description: "Text has been translated successfully",
       });
+      
+      // On mobile, scroll to top after translation to show result
+      if (window.innerWidth < 1024) {
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 500);
+      }
     } catch (error) {
       toast({
         title: "Translation failed",
@@ -218,91 +225,88 @@ export function OCRUpload({ onTextExtracted, onTranslateRequest }: OCRUploadProp
   return (
     <TooltipProvider>
       <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileImage className="h-5 w-5" />
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <FileImage className="h-4 w-4" />
             OCR Text Recognition
           </CardTitle>
-          <p className="text-sm text-muted-foreground mt-2">
-            Upload an image to extract text, then translate it using the translation settings above
+          <p className="text-xs text-muted-foreground mt-1">
+            Upload an image to extract text, then translate it
           </p>
         </CardHeader>
-        <CardContent className="space-y-4">
-        {/* Language Selection */}
-        <div className="space-y-2">
-          <Label className="flex items-center gap-2">
-            OCR Recognition Language
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="w-4 h-4 rounded-full bg-muted text-xs flex items-center justify-center cursor-help">
-                  ?
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-xs text-sm">
-                  Select the language of the text in your image for better recognition accuracy.
-                  This is different from translation language.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </Label>
-          <Select value={ocrLanguage} onValueChange={setOcrLanguage}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select image text language" />
-            </SelectTrigger>
-            <SelectContent>
-              {ocrLanguages.map((lang) => (
-                <SelectItem key={lang.code} value={lang.code}>
-                  <span className="flex items-center gap-2">
-                    <span>{lang.flag}</span>
-                    {lang.name}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">
-            💡 Choose the language of text in your image (not the translation target)
-          </p>
+        <CardContent className="space-y-3">
+        {/* Language Selection - Compact Grid Layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <Label className="text-xs flex items-center gap-1">
+              OCR Language
+              <Tooltip>
+                <TooltipTrigger>
+                  <div className="w-3 h-3 rounded-full bg-muted text-xs flex items-center justify-center cursor-help">
+                    ?
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs text-xs">
+                    Select the language of text in your image for better accuracy.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </Label>
+            <Select value={ocrLanguage} onValueChange={setOcrLanguage}>
+              <SelectTrigger className="h-8">
+                <SelectValue placeholder="Select language" />
+              </SelectTrigger>
+              <SelectContent>
+                {ocrLanguages.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    <span className="flex items-center gap-1 text-xs">
+                      <span>{lang.flag}</span>
+                      {lang.name}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1">
+            <Label className="text-xs flex items-center gap-1">
+              Translate To
+              <Tooltip>
+                <TooltipTrigger>
+                  <div className="w-3 h-3 rounded-full bg-muted text-xs flex items-center justify-center cursor-help">
+                    ?
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs text-xs">
+                    Target language for translation.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </Label>
+            <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+              <SelectTrigger className="h-8">
+                <SelectValue placeholder="Select target" />
+              </SelectTrigger>
+              <SelectContent>
+                {targetLanguages.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    <span className="flex items-center gap-1 text-xs">
+                      <span>{getLanguageFlag(lang.code)}</span>
+                      {t(`languages.${lang.code}` as any) || getLanguageName(lang.code)}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        {/* Translation Target Language */}
-        <div className="space-y-2">
-          <Label className="flex items-center gap-2">
-            Translation Target Language
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="w-4 h-4 rounded-full bg-muted text-xs flex items-center justify-center cursor-help">
-                  ?
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-xs text-sm">
-                  Select the language you want to translate the extracted text into.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </Label>
-          <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select translation target" />
-            </SelectTrigger>
-            <SelectContent>
-              {targetLanguages.map((lang) => (
-                <SelectItem key={lang.code} value={lang.code}>
-                  <span className="flex items-center gap-2">
-                    <span>{getLanguageFlag(lang.code)}</span>
-                    {t(`languages.${lang.code}` as any) || getLanguageName(lang.code)}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* File Upload Area */}
+        {/* File Upload Area - Compact */}
         <div
-          className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
+          className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center cursor-pointer hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
@@ -316,18 +320,18 @@ export function OCRUpload({ onTextExtracted, onTranslateRequest }: OCRUploadProp
           />
           
           {selectedFile ? (
-            <div className="space-y-2">
-              <FileImage className="h-8 w-8 mx-auto text-green-500" />
-              <p className="text-sm font-medium">{selectedFile.name}</p>
+            <div className="space-y-1">
+              <FileImage className="h-6 w-6 mx-auto text-green-500" />
+              <p className="text-xs font-medium truncate">{selectedFile.name}</p>
               <p className="text-xs text-gray-500">
                 {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
               </p>
             </div>
           ) : (
-            <div className="space-y-2">
-              <Upload className="h-8 w-8 mx-auto text-gray-400" />
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Click to upload or drag and drop an image
+            <div className="space-y-1">
+              <Upload className="h-6 w-6 mx-auto text-gray-400" />
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                Click or drag image here
               </p>
               <p className="text-xs text-gray-500">
                 PNG, JPG, WEBP up to 10MB
@@ -336,25 +340,26 @@ export function OCRUpload({ onTextExtracted, onTranslateRequest }: OCRUploadProp
           )}
         </div>
 
-        {/* Image Preview */}
+        {/* Image Preview - Collapsible and Compact */}
         {previewUrl && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Image Preview</Label>
-              <div className="flex items-center gap-2">
+              <Label className="text-xs">Preview</Label>
+              <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowPreview(!showPreview)}
+                  className="h-6 w-6 p-0"
                 >
                   {showPreview ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className="h-3 w-3" />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-3 w-3" />
                   )}
                 </Button>
-                <Button variant="ghost" size="sm" onClick={clearFile}>
-                  <X className="h-4 w-4" />
+                <Button variant="ghost" size="sm" onClick={clearFile} className="h-6 w-6 p-0">
+                  <X className="h-3 w-3" />
                 </Button>
               </div>
             </div>
@@ -364,24 +369,25 @@ export function OCRUpload({ onTextExtracted, onTranslateRequest }: OCRUploadProp
                 <img
                   src={previewUrl}
                   alt="Preview"
-                  className="max-w-full max-h-64 mx-auto rounded"
+                  className="max-w-full max-h-32 mx-auto rounded object-contain"
                 />
               </div>
             )}
           </div>
         )}
 
-        {/* Action Buttons */}
+        {/* Action Buttons - Compact */}
         <div className="space-y-2">
           <div className="flex gap-2">
             <Button
               onClick={processOCR}
               disabled={!selectedFile || isProcessing}
-              className="flex-1"
+              className="flex-1 h-8 text-xs"
+              size="sm"
             >
               {isProcessing ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                   Processing...
                 </>
               ) : (
@@ -390,7 +396,7 @@ export function OCRUpload({ onTextExtracted, onTranslateRequest }: OCRUploadProp
             </Button>
             
             {selectedFile && (
-              <Button variant="outline" onClick={clearFile}>
+              <Button variant="outline" onClick={clearFile} className="h-8 text-xs" size="sm">
                 Clear
               </Button>
             )}
@@ -401,17 +407,18 @@ export function OCRUpload({ onTextExtracted, onTranslateRequest }: OCRUploadProp
             <Button
               onClick={handleTranslate}
               disabled={isTranslating}
-              className="w-full"
+              className="w-full h-8 text-xs"
               variant="secondary"
+              size="sm"
             >
               {isTranslating ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                   Translating...
                 </>
               ) : (
                 <>
-                  <Languages className="mr-2 h-4 w-4" />
+                  <Languages className="mr-1 h-3 w-3" />
                   Translate to {getLanguageName(targetLanguage)}
                 </>
               )}
@@ -419,25 +426,25 @@ export function OCRUpload({ onTextExtracted, onTranslateRequest }: OCRUploadProp
           )}
         </div>
 
-        {/* Extracted Text Display */}
+        {/* Extracted Text Display - Compact */}
         {extractedText && (
-          <div className="space-y-2">
-            <Label>Extracted Text:</Label>
-            <div className="min-h-[80px] p-3 rounded-md bg-muted/30 border border-border/50 glass-effect">
-              <div className="whitespace-pre-wrap text-sm leading-relaxed">{extractedText}</div>
+          <div className="space-y-1">
+            <Label className="text-xs">Extracted Text:</Label>
+            <div className="max-h-20 p-2 rounded-md bg-muted/30 border border-border/50 glass-effect overflow-y-auto">
+              <div className="whitespace-pre-wrap text-xs leading-relaxed">{extractedText}</div>
             </div>
             <div className="text-xs text-muted-foreground">
-              {extractedText.length} characters extracted
+              {extractedText.length} characters
             </div>
           </div>
         )}
 
         {isProcessing && (
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
+          <div className="space-y-1">
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-3/4" />
             <p className="text-xs text-gray-500 text-center">
-              Processing image... This may take a few seconds.
+              Processing image...
             </p>
           </div>
         )}

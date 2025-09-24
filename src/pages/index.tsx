@@ -190,6 +190,35 @@ export default function Home() {
           toast({
             description: t("toast.translate_success"),
           });
+          // Auto-scroll to translation result after successful translation
+          setTimeout(() => {
+            const translationCard = document.querySelector('[data-translation-result]');
+            if (translationCard) {
+              // Add highlight animation
+              translationCard.classList.add('translation-highlight');
+              
+              // Different scroll behavior for desktop and mobile
+              if (window.innerWidth >= 1024) {
+                // On desktop, scroll to translation result
+                translationCard.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'start',
+                  inline: 'nearest'
+                });
+              } else {
+                // On mobile, scroll to top to show language selection and result
+                const container = document.getElementById("page-scroll-container");
+                if (container) {
+                  container.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }
+              
+              // Remove highlight class after animation
+              setTimeout(() => {
+                translationCard.classList.remove('translation-highlight');
+              }, 1500);
+            }
+          }, 300);
         },
         onError: (message) => {
           toast({
@@ -311,7 +340,7 @@ export default function Home() {
           </Card>
 
           {/* Translation Interface */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 ocr-translation-container">
             {/* Input */}
             <Card className="card-hover glass-effect shadow-elegant animate-slide-in" style={{ animationDelay: '0.4s' }}>
               <CardHeader>
@@ -378,7 +407,7 @@ export default function Home() {
                   </TabsContent>
                   
                   <TabsContent value="ocr" className="mt-4">
-                    <div className="space-y-4">
+                    <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 ocr-scroll-container">
                       <OCRUpload 
                         onTextExtracted={handleOCRTextExtracted}
                         onTranslateRequest={handleOCRTranslateRequest}
@@ -390,7 +419,11 @@ export default function Home() {
             </Card>
 
             {/* Output */}
-            <Card className="card-hover glass-effect shadow-elegant animate-slide-in" style={{ animationDelay: '0.5s' }}>
+            <Card 
+              className="card-hover glass-effect shadow-elegant animate-slide-in lg:sticky lg:top-4 lg:self-start smooth-scroll-target" 
+              style={{ animationDelay: '0.5s' }}
+              data-translation-result
+            >
               <CardHeader>
                 <CardTitle className="text-lg font-semibold">
                   {t("translation.translation_result")}
@@ -400,38 +433,38 @@ export default function Home() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                           <div className="min-h-[200px] p-4 rounded-md bg-muted/30 border border-border/50 glass-effect">
-                 {isLoading ? (
-                   <div className="space-y-2">
-                     <Skeleton className="h-4 w-full" />
-                     <Skeleton className="h-4 w-3/4" />
-                     <Skeleton className="h-4 w-1/2" />
-                   </div>
-                 ) : error ? (
-                   <div className="text-destructive text-sm">{error}</div>
-                 ) : translatedText ? (
-                   <div className="whitespace-pre-wrap text-sm leading-relaxed">{translatedText}</div>
-                 ) : (
-                   <div className="text-muted-foreground text-sm italic">
-                     {t("translation.no_result")}
-                   </div>
-                 )}
-               </div>
-               <div className="flex justify-end">
-                 <Button
-                   variant="outline"
-                   size="sm"
-                   onClick={() => handleCopy(translatedText || "")}
-                   disabled={!translatedText}
-                   className="hover-float"
-                 >
-                   <Copy className="h-4 w-4 mr-2" />
-                   {t("translation.copy_button")}
-                 </Button>
-               </div>
-            </CardContent>
-          </Card>
-        </div>
+                <div className="min-h-[200px] p-4 rounded-md bg-muted/30 border border-border/50 glass-effect">
+                  {isLoading ? (
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                  ) : error ? (
+                    <div className="text-destructive text-sm">{error}</div>
+                  ) : translatedText ? (
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed">{translatedText}</div>
+                  ) : (
+                    <div className="text-muted-foreground text-sm italic">
+                      {t("translation.no_result")}
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleCopy(translatedText || "")}
+                    disabled={!translatedText}
+                    className="hover-float"
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    {t("translation.copy_button")}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
         {/* API Test Section - Show when API key is configured */}
         {apiKey && (
