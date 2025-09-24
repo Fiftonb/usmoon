@@ -13,8 +13,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { ApiTest } from "@/components/api-test";
+import { OCRUpload } from "@/components/ocr-upload";
 import { useTranslate } from "@/hooks/use-translate";
 import { languages, getLanguageName } from "@/lib/languages";
 import { 
@@ -22,7 +24,9 @@ import {
   Copy, 
   Trash2, 
   Languages,
-  Zap
+  Zap,
+  FileImage,
+  Type
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -163,6 +167,41 @@ export default function Home() {
     });
   };
 
+  const handleOCRTextExtracted = (text: string) => {
+    setInputText(text);
+    reset(); // Clear any previous translation
+  };
+
+  const handleOCRTranslateRequest = async (text: string, targetLang: string) => {
+    setInputText(text);
+    setTargetLang(targetLang);
+    reset(); // Clear any previous translation
+    
+    // Wait a bit for state to update, then translate
+    setTimeout(async () => {
+      await translate({
+        text: text,
+        sourceLang: "auto", // Let AI detect source language
+        targetLang: targetLang,
+        apiKey,
+        baseURL,
+        model,
+        onSuccess: () => {
+          toast({
+            description: t("toast.translate_success"),
+          });
+        },
+        onError: (message) => {
+          toast({
+            title: t("toast.translate_failed"),
+            description: message,
+            variant: "destructive",
+          });
+        }
+      });
+    }, 100);
+  };
+
   const sourceLanguages = languages;
   const targetLanguages = languages.filter(lang => lang.code !== "auto");
 
@@ -284,45 +323,69 @@ export default function Home() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Textarea
-                  placeholder={t("translation.input_placeholder")}
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  className="min-h-[200px] resize-none glass-effect border-animate focus:shadow-luxury transition-all duration-300"
-                />
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    {inputText.length} {t("common.characters")}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setInputText("")}
-                      className="hover-float"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      {t("translation.clear_button")}
-                    </Button>
-                    <Button
-                      onClick={handleTranslate}
-                      disabled={isLoading || !inputText.trim()}
-                      className="btn-modern hover-float clickable"
-                    >
-                      {isLoading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          {t("translation.translate_button")}...
-                        </>
-                      ) : (
-                        <>
-                          <Zap className="h-4 w-4 mr-2" />
-                          {t("translation.translate_button")}
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
+                <Tabs defaultValue="text" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="text" className="flex items-center gap-2">
+                      <Type className="h-4 w-4" />
+                      Text Input
+                    </TabsTrigger>
+                    <TabsTrigger value="ocr" className="flex items-center gap-2">
+                      <FileImage className="h-4 w-4" />
+                      OCR Upload
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="text" className="space-y-4 mt-4">
+                    <Textarea
+                      placeholder={t("translation.input_placeholder")}
+                      value={inputText}
+                      onChange={(e) => setInputText(e.target.value)}
+                      className="min-h-[200px] resize-none glass-effect border-animate focus:shadow-luxury transition-all duration-300"
+                    />
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">
+                        {inputText.length} {t("common.characters")}
+                      </span>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setInputText("")}
+                          className="hover-float"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          {t("translation.clear_button")}
+                        </Button>
+                        <Button
+                          onClick={handleTranslate}
+                          disabled={isLoading || !inputText.trim()}
+                          className="btn-modern hover-float clickable"
+                        >
+                          {isLoading ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              {t("translation.translate_button")}...
+                            </>
+                          ) : (
+                            <>
+                              <Zap className="h-4 w-4 mr-2" />
+                              {t("translation.translate_button")}
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="ocr" className="mt-4">
+                    <div className="space-y-4">
+                      <OCRUpload 
+                        onTextExtracted={handleOCRTextExtracted}
+                        onTranslateRequest={handleOCRTranslateRequest}
+                      />
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
 
