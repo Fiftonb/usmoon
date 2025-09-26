@@ -25,7 +25,8 @@
     "translation_result": "翻译结果",
     "no_result": "还没有翻译结果。输入一些文本并点击翻译开始使用。",
     "text_input_tab": "文本输入",
-    "ocr_upload_tab": "OCR 上传"
+    "ocr_upload_tab": "OCR 上传",
+    "ocr_disabled_vercel": "由于部署限制，OCR 功能在 Vercel 上被禁用。请改用文本输入。"
   },
   "ocr": {
     "title": "OCR 文字识别",

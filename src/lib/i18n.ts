@@ -29,6 +29,7 @@ export interface Translations {
     no_result: string;
     text_input_tab: string;
     ocr_upload_tab: string;
+    ocr_disabled_vercel: string;
   };
   ocr: {
     title: string;

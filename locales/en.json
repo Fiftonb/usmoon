@@ -25,7 +25,8 @@
     "translation_result": "Translation Result",
     "no_result": "No translation result yet. Enter some text and click translate to get started.",
     "text_input_tab": "Text Input",
-    "ocr_upload_tab": "OCR Upload"
+    "ocr_upload_tab": "OCR Upload",
+    "ocr_disabled_vercel": "OCR functionality is disabled on Vercel due to deployment limitations. Please use the text input instead."
   },
   "ocr": {
     "title": "OCR Text Recognition",

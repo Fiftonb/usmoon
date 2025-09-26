@@ -44,6 +44,9 @@ export default function Home() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
+  // Check if running on Vercel
+  const isVercelEnvironment = process.env.NEXT_PUBLIC_IS_VERCEL === 'true';
+
   // Prevent body scrolling and use container scrolling instead
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -327,16 +330,28 @@ export default function Home() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Show OCR disabled notice for Vercel environment */}
+                {isVercelEnvironment && (
+                  <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                    <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200 text-sm">
+                      <FileImage className="h-4 w-4" />
+                      <span>{t("translation.ocr_disabled_vercel")}</span>
+                    </div>
+                  </div>
+                )}
+                
                 <Tabs defaultValue="text" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
+                  <TabsList className={`grid w-full ${isVercelEnvironment ? 'grid-cols-1' : 'grid-cols-2'}`}>
                     <TabsTrigger value="text" className="flex items-center gap-2">
                       <Type className="h-4 w-4" />
                       {t("translation.text_input_tab")}
                     </TabsTrigger>
-                    <TabsTrigger value="ocr" className="flex items-center gap-2">
-                      <FileImage className="h-4 w-4" />
-                      {t("translation.ocr_upload_tab")}
-                    </TabsTrigger>
+                    {!isVercelEnvironment && (
+                      <TabsTrigger value="ocr" className="flex items-center gap-2">
+                        <FileImage className="h-4 w-4" />
+                        {t("translation.ocr_upload_tab")}
+                      </TabsTrigger>
+                    )}
                   </TabsList>
                   
                   <TabsContent value="text" className="space-y-4 mt-4">
@@ -381,14 +396,16 @@ export default function Home() {
                     </div>
                   </TabsContent>
                   
-                  <TabsContent value="ocr" className="mt-4">
-                    <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 ocr-scroll-container">
-                      <OCRUpload 
-                        onTextExtracted={handleOCRTextExtracted}
-                        onTranslateRequest={handleOCRTranslateRequest}
-                      />
-                    </div>
-                  </TabsContent>
+                  {!isVercelEnvironment && (
+                    <TabsContent value="ocr" className="mt-4">
+                      <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 ocr-scroll-container">
+                        <OCRUpload 
+                          onTextExtracted={handleOCRTextExtracted}
+                          onTranslateRequest={handleOCRTranslateRequest}
+                        />
+                      </div>
+                    </TabsContent>
+                  )}
                 </Tabs>
               </CardContent>
             </Card>
