@@ -58,6 +58,12 @@
   "settings": {
     "title": "API Settings",
     "description": "Configure your OpenAI-compatible API settings for translation.",
+    "use_builtin_api": "Use Built-in API",
+    "use_builtin_api_desc": "When enabled, use server pre-configured API, your keys won't be exposed in frontend",
+    "builtin_api_enabled": "✓ Built-in API Enabled",
+    "builtin_api_disabled": "Built-in API Not Configured",
+    "builtin_api_note": "Administrator has configured built-in API on the server, you can use it directly without configuring your own API key",
+    "custom_api_config": "Custom API Configuration",
     "api_key": "API Key",
     "api_key_placeholder": "Enter your OpenAI API key",
     "api_key_required": "API Key Required",

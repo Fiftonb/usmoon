@@ -98,6 +98,23 @@ npm start
 
 ### API 配置
 
+#### 方式一：使用内置 API（推荐用于团队部署）
+
+如果您是管理员并想为所有用户提供统一的 API 配置：
+
+1. 在项目根目录创建 `.env.local` 文件：
+```bash
+OPENAI_API_KEY=your_api_key_here
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=gpt-3.5-turbo
+```
+
+2. 用户可以在设置中开启"使用内置 API"开关，无需配置自己的 API 密钥
+
+详细配置说明请查看 [ENV_CONFIG.md](./ENV_CONFIG.md)
+
+#### 方式二：用户自定义 API
+
 在应用的设置面板中配置以下信息：
 
 - **API Key**: OpenAI API 密钥或兼容服务的密钥

@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Settings, AlertCircle, CheckCircle, RefreshCw, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useModels } from "@/hooks/use-models";
@@ -27,14 +28,16 @@ interface SettingsDialogProps {
   apiKey: string;
   baseURL: string;
   model: string;
-  onSave: (apiKey: string, baseURL: string, model: string) => void;
+  useBuiltinApi: boolean;
+  onSave: (apiKey: string, baseURL: string, model: string, useBuiltinApi: boolean) => void;
 }
 
-export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialogProps) {
+export function SettingsDialog({ apiKey, baseURL, model, useBuiltinApi, onSave }: SettingsDialogProps) {
   const [open, setOpen] = useState(false);
   const [tempApiKey, setTempApiKey] = useState(apiKey);
   const [tempBaseURL, setTempBaseURL] = useState(baseURL);
   const [tempModel, setTempModel] = useState(model);
+  const [tempUseBuiltinApi, setTempUseBuiltinApi] = useState(useBuiltinApi);
   const { toast } = useToast();
   const { t } = useTranslation();
   const { models, isLoading: modelsLoading, fetchModels, clearModels } = useModels();
@@ -43,7 +46,8 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
     setTempApiKey(apiKey);
     setTempBaseURL(baseURL);
     setTempModel(model);
-  }, [apiKey, baseURL, model]);
+    setTempUseBuiltinApi(useBuiltinApi);
+  }, [apiKey, baseURL, model, useBuiltinApi]);
 
   // Stable callbacks for model fetching
   const handleModelsSuccess = useCallback((count: number) => {
@@ -69,12 +73,12 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
     }
   }, [t, toast]);
 
-  // Auto-fetch models when dialog opens and API key exists
+  // Auto-fetch models when dialog opens and API key exists (or using built-in API)
   useEffect(() => {
-    if (open && tempApiKey.trim()) {
-      fetchModels(tempApiKey, tempBaseURL, handleModelsSuccess, handleModelsError);
+    if (open && (tempUseBuiltinApi || tempApiKey.trim())) {
+      fetchModels(tempUseBuiltinApi ? "" : tempApiKey, tempUseBuiltinApi ? "" : tempBaseURL, handleModelsSuccess, handleModelsError);
     }
-  }, [open]);
+  }, [open, tempUseBuiltinApi]);
 
   const validateURL = (url: string) => {
     if (!url.trim()) return true; // Empty is OK
@@ -90,7 +94,8 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
   const isValidURL = validateURL(tempBaseURL);
 
   const handleSave = () => {
-    if (!tempApiKey.trim()) {
+    // 如果不使用内置API，则需要验证API密钥
+    if (!tempUseBuiltinApi && !tempApiKey.trim()) {
       toast({
         title: t("settings.api_key_required"),
         description: t("settings.api_key_required_desc"),
@@ -99,7 +104,8 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
       return;
     }
 
-    if (!isValidURL) {
+    // 如果不使用内置API，则需要验证URL
+    if (!tempUseBuiltinApi && !isValidURL) {
       toast({
         title: t("settings.invalid_url"),
         description: t("settings.invalid_url_desc"),
@@ -117,7 +123,12 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
       return;
     }
 
-    onSave(tempApiKey.trim(), tempBaseURL.trim(), tempModel);
+    onSave(
+      tempUseBuiltinApi ? "" : tempApiKey.trim(), 
+      tempUseBuiltinApi ? "" : tempBaseURL.trim(), 
+      tempModel,
+      tempUseBuiltinApi
+    );
     setOpen(false);
     toast({
       description: t("toast.settings_saved"),
@@ -128,13 +139,14 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
     setTempApiKey(apiKey);
     setTempBaseURL(baseURL);
     setTempModel(model);
+    setTempUseBuiltinApi(useBuiltinApi);
     clearModels();
     setOpen(false);
   };
 
   const handleRefreshModels = useCallback(() => {
-    if (tempApiKey.trim()) {
-      fetchModels(tempApiKey, tempBaseURL, handleModelsSuccess, handleModelsError);
+    if (tempUseBuiltinApi || tempApiKey.trim()) {
+      fetchModels(tempUseBuiltinApi ? "" : tempApiKey, tempUseBuiltinApi ? "" : tempBaseURL, handleModelsSuccess, handleModelsError);
     } else {
       toast({
         title: t("settings.api_key_required"),
@@ -142,7 +154,7 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
         variant: "destructive",
       });
     }
-  }, [tempApiKey, tempBaseURL, fetchModels, handleModelsSuccess, handleModelsError, t, toast]);
+  }, [tempUseBuiltinApi, tempApiKey, tempBaseURL, fetchModels, handleModelsSuccess, handleModelsError, t, toast]);
 
   const commonEndpoints = [
     { name: "OpenAI Official", url: "https://api.openai.com/v1" },
@@ -165,8 +177,41 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3 sm:gap-4 py-3 sm:py-4">
-          <div className="space-y-2">
-            <Label htmlFor="apiKey" className="text-sm font-medium">{t("settings.api_key")} *</Label>
+          {/* 使用内置API开关 */}
+          <div className="space-y-3 p-3 bg-muted/30 rounded-lg border">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5 flex-1 pr-4">
+                <Label htmlFor="use-builtin-api" className="text-sm font-medium cursor-pointer">
+                  {t("settings.use_builtin_api")}
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {t("settings.use_builtin_api_desc")}
+                </p>
+              </div>
+              <Switch
+                id="use-builtin-api"
+                checked={tempUseBuiltinApi}
+                onCheckedChange={setTempUseBuiltinApi}
+              />
+            </div>
+            {tempUseBuiltinApi && (
+              <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400 pt-2 border-t">
+                <CheckCircle className="h-3 w-3" />
+                <span>{t("settings.builtin_api_enabled")}</span>
+              </div>
+            )}
+          </div>
+
+          {/* 自定义API配置 */}
+          {!tempUseBuiltinApi && (
+            <>
+              <div className="space-y-1">
+                <Label className="text-sm font-medium text-muted-foreground">
+                  {t("settings.custom_api_config")}
+                </Label>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="apiKey" className="text-sm font-medium">{t("settings.api_key")} *</Label>
             <Textarea
               id="apiKey"
               placeholder={t("settings.api_key_placeholder")}
@@ -209,7 +254,7 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
                 variant="outline"
                 size="sm"
                 onClick={handleRefreshModels}
-                disabled={modelsLoading || !tempApiKey.trim()}
+                disabled={modelsLoading || (!tempUseBuiltinApi && !tempApiKey.trim())}
                 className="text-xs sm:text-sm h-8 px-2 sm:px-3"
               >
                 {modelsLoading ? (
@@ -265,6 +310,8 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
               ))}
             </div>
           </div>
+            </>
+          )}
 
           <div className="bg-muted/50 rounded-md p-2.5 sm:p-3 space-y-2">
             <div className="font-medium text-xs sm:text-sm">{t("settings.dynamic_loading_title")}</div>
@@ -280,7 +327,11 @@ export function SettingsDialog({ apiKey, baseURL, model, onSave }: SettingsDialo
           <Button variant="outline" onClick={handleCancel} className="text-sm h-9">
             {t("settings.cancel")}
           </Button>
-          <Button onClick={handleSave} disabled={!isValidURL || !tempModel} className="text-sm h-9">
+          <Button 
+            onClick={handleSave} 
+            disabled={(!tempUseBuiltinApi && !isValidURL) || !tempModel} 
+            className="text-sm h-9"
+          >
             {t("settings.save")}
           </Button>
         </div>

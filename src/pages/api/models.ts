@@ -27,12 +27,18 @@ export default async function handler(
 
   const { apiKey, baseURL }: ModelsRequest = req.body;
 
-  if (!apiKey) {
+  // 支持使用内置API配置（从环境变量）
+  const finalApiKey = apiKey || process.env.OPENAI_API_KEY;
+  const finalBaseURL = baseURL || process.env.OPENAI_BASE_URL;
+
+  if (!finalApiKey) {
     return res.status(400).json({ error: "API key is required" });
   }
 
+  console.log("Using built-in API for models:", !apiKey); // Log if using built-in API
+
   // Validate and clean baseURL
-  let cleanBaseURL = baseURL?.trim();
+  let cleanBaseURL = finalBaseURL?.trim();
   if (cleanBaseURL && !cleanBaseURL.startsWith('http')) {
     cleanBaseURL = `https://${cleanBaseURL}`;
   }
@@ -62,7 +68,7 @@ export default async function handler(
     const response = await fetch(modelsUrl, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${finalApiKey}`,
         'Content-Type': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
         'Accept': 'application/json, */*',

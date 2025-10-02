@@ -41,6 +41,7 @@ export default function Home() {
   const [apiKey, setApiKey] = useState("YOUR_API_KEY");
   const [baseURL, setBaseURL] = useState("https://api.openai.com/v1");
   const [model, setModel] = useState("gpt-3.5-turbo");
+  const [useBuiltinApi, setUseBuiltinApi] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -73,15 +74,51 @@ export default function Home() {
     }
   };
 
-  // Load settings from localStorage
+  // Load settings from localStorage and check for built-in API
   useEffect(() => {
-    const savedApiKey = localStorage.getItem("openai-api-key");
-    const savedBaseURL = localStorage.getItem("openai-base-url");
-    const savedModel = localStorage.getItem("openai-model");
-    
-    if (savedApiKey) setApiKey(savedApiKey);
-    if (savedBaseURL) setBaseURL(savedBaseURL);
-    if (savedModel) setModel(savedModel);
+    const loadSettings = async () => {
+      const savedApiKey = localStorage.getItem("openai-api-key");
+      const savedBaseURL = localStorage.getItem("openai-base-url");
+      const savedModel = localStorage.getItem("openai-model");
+      const savedUseBuiltinApi = localStorage.getItem("use-builtin-api");
+      
+      if (savedApiKey) setApiKey(savedApiKey);
+      if (savedBaseURL) setBaseURL(savedBaseURL);
+      if (savedModel) setModel(savedModel);
+
+      // 检查是否配置了内置API
+      try {
+        const response = await fetch("/api/check-builtin-api");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.hasBuiltinApi) {
+            // 如果配置了内置API，且用户没有明确选择自定义API，则自动启用
+            if (savedUseBuiltinApi !== "false") {
+              setUseBuiltinApi(true);
+              localStorage.setItem("use-builtin-api", "true");
+              
+              // 自动设置模型
+              if (data.model && !savedModel) {
+                setModel(data.model);
+                localStorage.setItem("openai-model", data.model);
+              }
+            }
+          } else {
+            // 如果没有内置API配置，禁用该选项
+            if (savedUseBuiltinApi === "true") {
+              setUseBuiltinApi(false);
+              localStorage.setItem("use-builtin-api", "false");
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Failed to check built-in API:", error);
+        // 如果检查失败，使用保存的设置
+        if (savedUseBuiltinApi === "true") setUseBuiltinApi(true);
+      }
+    };
+
+    loadSettings();
   }, []);
 
   const {
@@ -101,7 +138,8 @@ export default function Home() {
       return;
     }
 
-    if (!apiKey) {
+    // 如果不使用内置API，则需要检查API密钥
+    if (!useBuiltinApi && !apiKey) {
       toast({
         variant: "destructive", 
         description: t("toast.please_configure_api"),
@@ -113,8 +151,8 @@ export default function Home() {
       text: inputText,
       sourceLang,
       targetLang,
-      apiKey,
-      baseURL,
+      apiKey: useBuiltinApi ? "" : apiKey,
+      baseURL: useBuiltinApi ? "" : baseURL,
       model,
       onSuccess: () => {
         toast({
@@ -157,14 +195,16 @@ export default function Home() {
     }
   };
 
-  const handleSaveSettings = (newApiKey: string, newBaseURL: string, newModel: string) => {
+  const handleSaveSettings = (newApiKey: string, newBaseURL: string, newModel: string, newUseBuiltinApi: boolean) => {
     setApiKey(newApiKey);
     setBaseURL(newBaseURL);
     setModel(newModel);
+    setUseBuiltinApi(newUseBuiltinApi);
     
     localStorage.setItem("openai-api-key", newApiKey);
     localStorage.setItem("openai-base-url", newBaseURL);
     localStorage.setItem("openai-model", newModel);
+    localStorage.setItem("use-builtin-api", String(newUseBuiltinApi));
     
     toast({
       description: t("toast.settings_saved"),
@@ -186,8 +226,8 @@ export default function Home() {
       text: text,
       sourceLang: "auto", // Let AI detect source language
       targetLang: targetLang,
-      apiKey,
-      baseURL,
+      apiKey: useBuiltinApi ? "" : apiKey,
+      baseURL: useBuiltinApi ? "" : baseURL,
       model,
       onSuccess: () => {
         // 简化处理，只显示成功提示，暂时移除滚动和动画
@@ -261,6 +301,7 @@ export default function Home() {
                 apiKey={apiKey}
                 baseURL={baseURL}
                 model={model}
+                useBuiltinApi={useBuiltinApi}
                 onSave={handleSaveSettings}
               />
             </div>
@@ -469,9 +510,9 @@ export default function Home() {
             </Card>
           </div>
 
-        {/* API Test Section - Show when API key is configured */}
-        {apiKey && (
-          <ApiTest apiKey={apiKey} baseURL={baseURL} model={model} />
+        {/* API Test Section - Show when API key is configured or using built-in API */}
+        {(useBuiltinApi || apiKey) && (
+          <ApiTest apiKey={useBuiltinApi ? "" : apiKey} baseURL={useBuiltinApi ? "" : baseURL} model={model} />
         )}
 
                  {/* Error Display */}

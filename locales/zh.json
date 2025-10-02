@@ -58,6 +58,12 @@
   "settings": {
     "title": "API 设置",
     "description": "配置您的 OpenAI 兼容 API 设置以进行翻译。",
+    "use_builtin_api": "使用内置 API",
+    "use_builtin_api_desc": "启用后将使用服务器预配置的 API，您的密钥不会暴露在前端",
+    "builtin_api_enabled": "✓ 内置 API 已启用",
+    "builtin_api_disabled": "内置 API 未配置",
+    "builtin_api_note": "管理员已在服务器上配置了内置 API，您可以直接使用而无需配置自己的 API 密钥",
+    "custom_api_config": "自定义 API 配置",
     "api_key": "API 密钥",
     "api_key_placeholder": "输入您的 OpenAI API 密钥",
     "api_key_required": "需要 API 密钥",

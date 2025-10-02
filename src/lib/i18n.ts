@@ -61,6 +61,12 @@ export interface Translations {
   settings: {
     title: string;
     description: string;
+    use_builtin_api: string;
+    use_builtin_api_desc: string;
+    builtin_api_enabled: string;
+    builtin_api_disabled: string;
+    builtin_api_note: string;
+    custom_api_config: string;
     api_key: string;
     api_key_placeholder: string;
     api_key_required: string;

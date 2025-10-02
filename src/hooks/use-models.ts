@@ -29,10 +29,11 @@ export function useModels(): UseModelsResult {
   const [error, setError] = useState<string | null>(null);
 
   const fetchModels = useCallback(async (apiKey: string, baseURL?: string, onSuccess?: (count: number) => void, onError?: (message: string, usesFallback: boolean) => void) => {
-    if (!apiKey.trim()) {
-      onError?.("API Key Required", false);
-      return;
-    }
+    // 允许空的 apiKey，让后端决定是否使用内置 API
+    // if (!apiKey.trim()) {
+    //   onError?.("API Key Required", false);
+    //   return;
+    // }
 
     setIsLoading(true);
     setError(null);
